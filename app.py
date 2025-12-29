@@ -1,22 +1,28 @@
+# Замените весь файл на этот исправленный вариант:
+
 from flask import Flask, render_template, send_from_directory, request
 from flask_socketio import SocketIO, emit
-from flask_cors import CORS  # Импорт CORS
+from flask_cors import CORS
 import uuid
 from collections import defaultdict
+import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # Включите CORS для Flask-маршрутов
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Настройте Socket.IO
 socketio = SocketIO(
     app,
-    cors_allowed_origins="*",  # Разрешить все источники для разработки
-    logger=True,                # Включить логи для отладки
-    engineio_logger=True,       # Логи Engine.IO
-    async_mode='threading'      # Режим работы
+    cors_allowed_origins="*",
+    logger=True,
+    engineio_logger=True,
+    async_mode='threading',
+    ping_timeout=60,
+    ping_interval=25,
+    always_connect=True
 )
 
 operators = [
@@ -58,14 +64,30 @@ def process_queue(operator):
 @socketio.on('connect')
 def handle_connect():
     print(f"Клиент подключился: {request.sid}")
-    emit('operators_update', operators)
+    # Не отправляем operators_update сразу, ждем регистрации
+    emit('connected', {'status': 'connected', 'sid': request.sid}, room=request.sid)
 
 @socketio.on('set_username')
 def handle_set_username(username):
     print(f"Пользователь установил имя: {username}")
+    
+    if not username or len(username.strip()) == 0:
+        emit('registration_error', {'error': 'Имя не может быть пустым'}, room=request.sid)
+        return
+    
+    # Сохраняем связь SID → username
     user_connections[username].add(request.sid)
-    emit('user_registered', {'username': username}, room=request.sid)
-    emit('operators_update', operators, broadcast=True)
+    
+    # Отправляем подтверждение
+    emit('user_registered', {
+        'username': username,
+        'message': 'Регистрация успешна'
+    }, room=request.sid)
+    
+    # Отправляем обновленный список операторов
+    emit('operators_update', operators, room=request.sid)
+    
+    print(f"Пользователь {username} зарегистрирован с SID: {request.sid}")
 
 @socketio.on('occupy_operator')
 def handle_occupy(data):
@@ -114,5 +136,17 @@ def handle_disconnect():
                 emit('operators_update', operators, broadcast=True)
             break
 
+@socketio.on('ping')
+def handle_ping():
+    emit('pong', room=request.sid)
+
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(
+        app,
+        host='0.0.0.0',
+        port=port,
+        debug=False,
+        allow_unsafe_werkzeug=True
+    )
