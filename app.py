@@ -1,5 +1,3 @@
-# Замените весь файл на этот исправленный вариант:
-
 from flask import Flask, render_template, send_from_directory, request
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
@@ -150,3 +148,4 @@ if __name__ == '__main__':
         debug=False,
         allow_unsafe_werkzeug=True
     )
+
