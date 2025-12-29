@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Управление операторами</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --input-bg: #3d3d3d;
+            --button-free: #4CAF50;
+            --button-busy: #f44336;
+            --accent-color: #2196F3;
+            --queue-color: #FFD700;
+            --queue-bg: #424242;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+        }
+
+        .login-form {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: var(--input-bg);
+            border: none;
+            border-radius: 5px;
+            color: var(--text-color);
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 12px;
+            background: var(--button-free);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: opacity 0.3s;
+        }
+
+        .user-header {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .operator-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            transition: transform 0.2s;
+        }
+
+        .operator-card.user-operator {
+            border: 2px solid var(--accent-color);
+        }
+
+        .operator-status {
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .operator-status.free {
+            background: var(--button-free);
+        }
+
+        .operator-status.busy {
+            background: var(--button-busy);
+        }
+
+        .queue-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--queue-bg);
+            border-radius: 5px;
+            display: none;
+        }
+
+        .queue-item {
+            padding: 5px;
+            margin: 3px 0;
+            background: var(--input-bg);
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .queue-number {
+            color: var(--queue-color);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        button.action-btn {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        /* ФИКС ДЛЯ ДИАЛОГА */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+
+        .os-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            z-index: 1000; /* Выше оверлея! */
+            text-align: center;
+            width: 90%;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .os-option {
+            padding: 15px;
+            margin: 10px 0;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: var(--input-bg);
+            color: white;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .os-option:hover {
+            background: var(--accent-color);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 1001;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast-notification.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: var(--card-bg);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-connected {
+            background: var(--button-free);
+            animation: pulse 2s infinite;
+        }
+
+        .status-disconnected {
+            background: var(--button-busy);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Индикатор подключения -->
+    <div class="connection-status" id="connectionStatus">
+        <div class="status-dot status-disconnected" id="statusDot"></div>
+        <span id="statusText">Подключение...</span>
+    </div>
+
+    <!-- Форма входа -->
+    <div class="login-form" id="loginForm">
+        <input type="text" id="usernameInput" placeholder="Введите ваше имя">
+        <input type="text" id="serverIpInput" placeholder="IP сервера (напр. 192.168.1.100)" value="192.168.1.100">
+        <button class="connect-btn" id="connectButton">Подключиться</button>
+    </div>
+
+    <!-- Основной интерфейс -->
+    <div class="user-header hidden" id="userHeader">
+        <h2>Пользователь: <span id="currentUser"></span></h2>
+        <p>Подключен к: <span id="serverAddress"></span> | Занято операторов: <span id="occupiedCount">0</span></p>
+    </div>
+
+    <div class="container hidden" id="operatorsContainer"></div>
+
+    <!-- Диалог выбора ОС -->
+    <div class="overlay hidden" id="osOverlay"></div>
+    <div class="os-dialog hidden" id="osDialog">
+        <h3>Выберите ОС</h3>
+        <button class="os-option" data-os="Windows">Windows</button>
+        <button class="os-option" data-os="Astra Linux">Astra Linux</button>
+    </div>
+
+    <!-- Аудио для уведомлений -->
+    <audio id="notificationSound" preload="auto">
+        <source src="/static/notification.wav" type="audio/wav">
+        Ваш браузер не поддерживает аудио элементы.
+    </audio>
+
+    <!-- Socket.io -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <script>
+        let currentUser = null;
+        let selectedOperatorId = null;
+        let socket = null;
+        let serverIp = '192.168.1.100';
+        let originalTitle = document.title;
+        let originalFavicon = document.querySelector('link[rel="icon"]').href;
+        let blinkInterval = null;
+        let isTabActive = true;
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            // Восстановить сохраненный IP
+            const savedIp = localStorage.getItem('lastServerIp');
+            if (savedIp) {
+                document.getElementById('serverIpInput').value = savedIp;
+                serverIp = savedIp;
+            }
+
+            // События формы
+            document.getElementById('connectButton').addEventListener('click', connectUser);
+            document.getElementById('usernameInput').addEventListener('keypress', e => {
+                if (e.key === 'Enter') connectUser();
+            });
+            
+            // События диалога ОС
+            document.querySelectorAll('.os-option').forEach(btn => {
+                btn.addEventListener('click', () => selectOS(btn.dataset.os));
+            });
+            
+            // Закрытие диалога по клику на оверлей
+            document.getElementById('osOverlay').addEventListener('click', () => {
+                document.getElementById('osOverlay').classList.add('hidden');
+                document.getElementById('osDialog').classList.add('hidden');
+            });
+            
+            // Отслеживание активности вкладки
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            
+            // Фокус на поле ввода
+            document.getElementById('usernameInput').focus();
+        }
+
+        function handleVisibilityChange() {
+            isTabActive = !document.hidden;
+            if (isTabActive && blinkInterval) {
+                stopTitleBlinking();
+            }
+        }
+
+        function connectUser() {
+            const username = document.getElementById('usernameInput').value.trim();
+            serverIp = document.getElementById('serverIpInput').value.trim() || '192.168.1.100';
+            
+            if (!username) {
+                showToast('Введите имя пользователя', 'error');
+                return;
+            }
+            
+            if (!serverIp) {
+                showToast('Введите IP-адрес сервера', 'error');
+                return;
+            }
+            
+            // Сохранить IP
+            localStorage.setItem('lastServerIp', serverIp);
+            
+            // Показать индикатор подключения
+            updateConnectionStatus(false, 'Подключение...');
+            
+            // Закрыть старое соединение если есть
+            if (socket) {
+                socket.disconnect();
+            }
+            
+            // Подключиться к серверу
+            connectToServer(username);
+        }
+
+        function connectToServer(username) {
+            console.log('Подключение к серверу:', `http://${serverIp}:5000`);
+            
+            socket = io(`http://${serverIp}:5000`, {
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000
+            });
+
+            // Обработчики событий
+            socket.on('connect', () => {
+                console.log('Успешно подключено к серверу');
+                updateConnectionStatus(true, 'Подключено');
+                
+                // Отправить имя пользователя
+                socket.emit('set_username', username);
+            });
+
+            socket.on('user_registered', data => {
+                currentUser = data.username;
+                showMainInterface();
+                showToast(`Добро пожаловать, ${data.username}!`, 'success');
+            });
+
+            socket.on('operators_update', updateOperators);
+
+            socket.on('queue_advanced', data => {
+                console.log('Уведомление о очереди:', data);
+                
+                if (data.username === currentUser) {
+                    playNotification();
+                    showTitleAlert(data.operator_name);
+                    showToast(`Оператор "${data.operator_name}" свободен! Займите его.`, 'warning');
+                }
+            });
+
+            socket.on('connect_error', err => {
+                console.error('Ошибка подключения:', err);
+                updateConnectionStatus(false, 'Ошибка подключения');
+                showToast('Не удалось подключиться к серверу. Проверьте IP.', 'error');
+            });
+
+            socket.on('disconnect', () => {
+                updateConnectionStatus(false, 'Отключено');
+            });
+
+            socket.on('reconnect', () => {
+                updateConnectionStatus(true, 'Подключено');
+                showToast('Соединение восстановлено', 'success');
+            });
+        }
+
+        function showMainInterface() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('userHeader').classList.remove('hidden');
+            document.getElementById('operatorsContainer').classList.remove('hidden');
+            
+            document.getElementById('currentUser').textContent = currentUser;
+            document.getElementById('serverAddress').textContent = serverIp;
+        }
+
+        function showOSDialog(operatorId, isQueue = false) {
+            selectedOperatorId = operatorId;
+            document.getElementById('osDialog').dataset.queue = isQueue;
+            document.getElementById('osOverlay').classList.remove('hidden');
+            document.getElementById('osDialog').classList.remove('hidden');
+        }
+
+        function selectOS(osType) {
+            const isQueue = document.getElementById('osDialog').dataset.queue === 'true';
+            
+            document.getElementById('osOverlay').classList.add('hidden');
+            document.getElementById('osDialog').classList.add('hidden');
+
+            const eventData = {
+                operator_id: selectedOperatorId,
+                username: currentUser,
+                os_type: osType
+            };
+
+            socket.emit(isQueue ? 'join_queue' : 'occupy_operator', eventData);
+        }
+
+        function releaseOperator(operatorId) {
+            socket.emit('release_operator', {
+                operator_id: operatorId,
+                username: currentUser
+            });
+        }
+
+        function updateOperators(operators) {
+            const container = document.getElementById('operatorsContainer');
+            container.innerHTML = '';
+            let occupiedCount = 0;
+
+            operators.forEach(op => {
+                const isUserOperator = op.occupied_by === currentUser;
+                const isInQueue = op.queue.some(u => u.username === currentUser);
+                
+                const card = document.createElement('div');
+                card.className = `operator-card ${isUserOperator ? 'user-operator' : ''}`;
+                
+                // Статус оператора
+                const statusHTML = op.occupied_by 
+                    ? `Занят: ${op.occupied_by}<br>ОС: ${op.os_type || 'Не указана'}`
+                    : 'Свободен';
+
+                card.innerHTML = `
+                    <h3>${op.name}</h3>
+                    <div class="operator-status ${op.occupied_by ? 'busy' : 'free'}">
+                        ${statusHTML}
+                    </div>
+                `;
+
+                // Очередь
+                const queueList = document.createElement('div');
+                queueList.className = 'queue-list';
+                
+                if (op.queue.length > 0) {
+                    queueList.innerHTML = '<strong>Очередь:</strong>';
+                    op.queue.forEach((user, index) => {
+                        const queueClass = user.username === currentUser ? 'user-queue-item' : '';
+                        queueList.innerHTML += `
+                            <div class="queue-item ${queueClass}">
+                                <span class="queue-number">${index + 1}.</span>
+                                <span>${user.username} (${user.os_type})</span>
+                            </div>
+                        `;
+                    });
+                    queueList.style.display = 'block';
+                }
+                card.appendChild(queueList);
+
+                // Кнопки действий
+                const btnContainer = document.createElement('div');
+                
+                if (op.occupied_by) {
+                    if (op.occupied_by !== currentUser && !isInQueue) {
+                        btnContainer.innerHTML = `
+                            <button class="action-btn" style="background: var(--queue-color)" 
+                                    onclick="showOSDialog('${op.id}', true)">
+                                Встать в очередь
+                            </button>
+                        `;
+                    }
+                } else {
+                    btnContainer.innerHTML = `
+                        <button class="action-btn free" onclick="showOSDialog('${op.id}')">
+                            Занять
+                        </button>
+                    `;
+                }
+
+                if (isUserOperator) {
+                    btnContainer.innerHTML += `
+                        <button class="action-btn busy" 
+                                onclick="releaseOperator('${op.id}')">
+                            Освободить
+                        </button>
+                    `;
+                    occupiedCount++;
+                }
+
+                card.appendChild(btnContainer);
+                container.appendChild(card);
+            });
+
+            document.getElementById('occupiedCount').textContent = occupiedCount;
+        }
+
+        function playNotification() {
+            const notificationSound = document.getElementById('notificationSound');
+            
+            try {
+                notificationSound.currentTime = 0;
+                notificationSound.volume = 0.7;
+                const playPromise = notificationSound.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log('Автовоспроизведение заблокировано');
+                        // Разрешить звук при следующем клике
+                        document.addEventListener('click', function enableSoundOnce() {
+                            notificationSound.play();
+                            document.removeEventListener('click', enableSoundOnce);
+                        }, { once: true });
+                    });
+                }
+            } catch (error) {
+                console.log('Ошибка воспроизведения звука:', error);
+            }
+        }
+
+        function showTitleAlert(operatorName) {
+            if (blinkInterval) {
+                clearInterval(blinkInterval);
+            }
+            
+            let blinkCount = 0;
+            const favicon = document.querySelector('link[rel="icon"]');
+            const alertFavicon = '/static/alert.ico?' + Date.now();
+            
+            blinkInterval = setInterval(() => {
+                if (blinkCount % 2 === 0) {
+                    document.title = `🚨 ${operatorName} СВОБОДЕН! 🚨`;
+                    favicon.href = alertFavicon;
+                } else {
+                    document.title = originalTitle;
+                    favicon.href = originalFavicon;
+                }
+                
+                blinkCount++;
+                
+                if (blinkCount >= 40) { // 20 секунд
+                    stopTitleBlinking();
+                }
+            }, 500);
+        }
+
+        function stopTitleBlinking() {
+            if (blinkInterval) {
+                clearInterval(blinkInterval);
+                blinkInterval = null;
+                document.title = originalTitle;
+                document.querySelector('link[rel="icon"]').href = originalFavicon;
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            // Удалить старое уведомление
+            const oldToast = document.querySelector('.toast-notification');
+            if (oldToast) {
+                oldToast.remove();
+            }
+            
+            // Создать новое
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <div>${icons[type] || icons.info} ${message}</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Автоматически скрыть
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 500);
+            }, 5000);
+            
+            // Закрытие по клику
+            toast.addEventListener('click', () => {
+                toast.classList.add('fade-out');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 500);
+            });
+        }
+
+        function updateConnectionStatus(connected, message = '') {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            if (connected) {
+                statusDot.className = 'status-dot status-connected';
+                statusText.textContent = message || 'Подключено';
+            } else {
+                statusDot.className = 'status-dot status-disconnected';
+                statusText.textContent = message || 'Не подключено';
+            }
+        }
+
+        // Экспорт функций для вызова из onclick
+        window.showOSDialog = showOSDialog;
+        window.releaseOperator = releaseOperator;
+    </script>
+</body>
+</html>
