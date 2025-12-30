@@ -370,7 +370,7 @@
             transform: none !important;
         }
 
-        /* ФИКС ДЛЯ ОВЕРЛЕЯ И ДИАЛОГА */
+        /* ФИКС ДЛЯ ОВЕРЛЕЯ И ДИАЛОГА - ЦЕНТРИРОВАННЫЙ И КРУПНЫЙ */
         #osOverlay {
             position: fixed;
             top: 0;
@@ -383,20 +383,26 @@
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(5px);
+            padding: 20px;
         }
 
         #osDialog {
             position: relative;
             background: linear-gradient(135deg, var(--card-bg) 0%, #363636 100%);
-            padding: 40px;
-            border-radius: 20px;
+            padding: 50px 40px;
+            border-radius: 25px;
             z-index: 1001;
             text-align: center;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 600px;
+            min-height: 350px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7);
             border: 1px solid rgba(255,255,255,0.1);
             animation: dialogAppear 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         @keyframes dialogAppear {
@@ -413,38 +419,59 @@
         #osDialog h3 {
             margin-top: 0;
             color: var(--accent-color);
-            margin-bottom: 30px;
-            font-size: 24px;
+            margin-bottom: 40px;
+            font-size: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            width: 100%;
+        }
+
+        .os-options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
         }
 
         .os-option {
-            padding: 18px;
-            margin: 12px 0;
+            padding: 30px 25px;
+            margin: 0;
             width: 100%;
             border: none;
-            border-radius: 12px;
+            border-radius: 20px;
             cursor: pointer;
-            background: var(--input-bg);
+            background: linear-gradient(135deg, var(--input-bg) 0%, #444 100%);
             color: white;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 26px;
+            font-weight: 700;
             transition: all 0.3s;
-            border: 2px solid transparent;
+            border: 3px solid transparent;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 25px;
+            min-height: 100px;
         }
 
         .os-option:hover {
-            background: var(--accent-color);
-            transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(33, 150, 243, 0.3);
+            background: linear-gradient(135deg, var(--accent-color) 0%, #1976D2 100%);
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 25px 50px rgba(33, 150, 243, 0.5);
             border-color: white;
         }
 
         .os-option:active {
-            transform: translateY(-2px);
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .os-option-icon {
+            font-size: 40px;
+            flex-shrink: 0;
+        }
+
+        .os-option-text {
+            font-size: 26px;
+            font-weight: 700;
         }
 
         .hidden {
@@ -578,6 +605,7 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Адаптация для мобильных устройств */
         @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
@@ -614,6 +642,34 @@
                 padding: 25px;
                 margin: 30px auto;
             }
+            
+            /* Адаптация диалога ОС для мобильных */
+            #osDialog {
+                padding: 40px 25px;
+                max-width: 90vw;
+                min-height: 300px;
+                border-radius: 20px;
+            }
+            
+            #osDialog h3 {
+                font-size: 26px;
+                margin-bottom: 30px;
+            }
+            
+            .os-option {
+                padding: 25px 20px;
+                font-size: 22px;
+                min-height: 85px;
+                gap: 20px;
+            }
+            
+            .os-option-icon {
+                font-size: 34px;
+            }
+            
+            .os-option-text {
+                font-size: 22px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -637,8 +693,33 @@
                 top: 15px;
             }
             
+            /* Адаптация диалога ОС для очень маленьких экранов */
             #osDialog {
-                padding: 30px;
+                padding: 30px 20px;
+                max-width: 95vw;
+                min-height: 280px;
+                border-radius: 18px;
+            }
+            
+            #osDialog h3 {
+                font-size: 24px;
+                margin-bottom: 25px;
+            }
+            
+            .os-option {
+                padding: 22px 18px;
+                font-size: 20px;
+                min-height: 75px;
+                gap: 15px;
+                border-radius: 15px;
+            }
+            
+            .os-option-icon {
+                font-size: 30px;
+            }
+            
+            .os-option-text {
+                font-size: 20px;
             }
         }
 
@@ -728,16 +809,20 @@
 
     <div class="container hidden" id="operatorsContainer"></div>
 
-    <!-- Диалог выбора ОС (ИСПРАВЛЕННЫЙ) -->
+    <!-- Диалог выбора ОС (ЦЕНТРИРОВАННЫЙ И КРУПНЫЙ) -->
     <div class="overlay hidden" id="osOverlay"></div>
     <div class="os-dialog hidden" id="osDialog">
         <h3>💻 Выберите операционную систему</h3>
-        <button class="os-option" data-os="Windows">
-            <span>🪟</span> Windows
-        </button>
-        <button class="os-option" data-os="Astra Linux">
-            <span>🐧</span> Astra Linux
-        </button>
+        <div class="os-options-container">
+            <button class="os-option" data-os="Windows">
+                <span class="os-option-icon">🪟</span>
+                <span class="os-option-text">Windows</span>
+            </button>
+            <button class="os-option" data-os="Astra Linux">
+                <span class="os-option-icon">🐧</span>
+                <span class="os-option-text">Astra Linux</span>
+            </button>
+        </div>
     </div>
 
     <!-- Кнопка выхода -->
@@ -794,7 +879,7 @@
                 if (e.key === 'Enter') connectUser();
             });
 
-            // События диалога ОС - ФИКС ЗДЕСЬ!
+            // События диалога ОС
             document.querySelectorAll('.os-option').forEach(btn => {
                 btn.addEventListener('click', function() {
                     selectOS(this.getAttribute('data-os'));
