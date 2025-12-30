@@ -370,7 +370,7 @@
             transform: none !important;
         }
 
-        /* ФИКС ДЛЯ ОВЕРЛЕЯ И ДИАЛОГА - ПОДНЯТ ВВЕРХ */
+        /* ФИКС ДЛЯ ОВЕРЛЕЯ И ДИАЛОГА - ПРОСТО ПОДНИМАЕМ ВВЕРХ */
         #osOverlay {
             position: fixed;
             top: 0;
@@ -380,10 +380,10 @@
             background: rgba(0,0,0,0.85);
             z-index: 1000;
             display: flex;
-            align-items: flex-start;
+            align-items: flex-start; /* ИЗМЕНЕНО: было center, стало flex-start */
             justify-content: center;
             backdrop-filter: blur(5px);
-            padding-top: 10vh;
+            padding-top: 50px; /* ДОБАВЛЕНО: отступ сверху */
             overflow-y: auto;
         }
 
@@ -399,7 +399,7 @@
             box-shadow: 0 25px 70px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.1);
             animation: dialogAppear 0.3s ease-out;
-            margin-top: 5vh;
+            margin-top: 0; /* УБРАНО: был margin-top */
         }
 
         @keyframes dialogAppear {
@@ -637,14 +637,12 @@
                 margin: 30px auto;
             }
             
-            /* Адаптация диалога ОС для мобильных */
+            /* Адаптация диалога ОС для мобильных - ПОДНИМАЕМ ЕЩЕ ВЫШЕ */
             #osOverlay {
-                padding-top: 5vh;
-                align-items: flex-start;
+                padding-top: 30px; /* Меньше отступ для мобильных */
             }
             
             #osDialog {
-                margin-top: 3vh;
                 padding: 30px 20px;
                 max-width: 85vw;
             }
@@ -658,14 +656,6 @@
                 padding: 16px 18px;
                 font-size: 17px;
                 gap: 12px;
-            }
-            
-            .os-option-icon {
-                font-size: 22px;
-            }
-            
-            .os-option-text {
-                font-size: 17px;
             }
         }
 
@@ -692,11 +682,10 @@
             
             /* Адаптация диалога ОС для очень маленьких экранов */
             #osOverlay {
-                padding-top: 3vh;
+                padding-top: 20px; /* Еще меньше отступ */
             }
             
             #osDialog {
-                margin-top: 2vh;
                 padding: 25px 18px;
                 max-width: 90vw;
                 border-radius: 15px;
@@ -712,42 +701,6 @@
                 font-size: 16px;
                 gap: 10px;
                 border-radius: 10px;
-            }
-            
-            .os-option-icon {
-                font-size: 20px;
-            }
-            
-            .os-option-text {
-                font-size: 16px;
-            }
-        }
-
-        @media (max-height: 700px) {
-            #osOverlay {
-                padding-top: 2vh;
-            }
-            
-            #osDialog {
-                margin-top: 1vh;
-                padding: 25px 20px;
-            }
-            
-            .os-option {
-                padding: 14px 16px;
-            }
-        }
-
-        @media (max-height: 600px) {
-            #osOverlay {
-                align-items: center;
-                padding-top: 0;
-            }
-            
-            #osDialog {
-                margin-top: 0;
-                max-height: 90vh;
-                overflow-y: auto;
             }
         }
 
