@@ -30,7 +30,6 @@
             margin: 0;
             padding: 15px;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
         }
 
         .login-form {
@@ -148,7 +147,6 @@
             border-radius: 10px;
             border-left: 4px solid var(--accent-color);
             min-width: 150px;
-            backdrop-filter: blur(10px);
         }
 
         .stat-item .stat-value {
@@ -178,22 +176,10 @@
             transition: all 0.3s;
             border: 1px solid rgba(255,255,255,0.05);
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .operator-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-color), transparent);
         }
 
         .operator-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             border-color: rgba(255,255,255,0.1);
         }
@@ -201,12 +187,6 @@
         .operator-card.user-operator {
             border: 2px solid var(--accent-color);
             box-shadow: 0 0 30px rgba(33, 150, 243, 0.4);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 30px rgba(33, 150, 243, 0.4); }
-            50% { box-shadow: 0 0 40px rgba(33, 150, 243, 0.6); }
         }
 
         .operator-card h3 {
@@ -227,7 +207,6 @@
             margin: 20px 0;
             font-weight: 600;
             transition: all 0.3s;
-            backdrop-filter: blur(10px);
         }
 
         .operator-status.free {
@@ -391,37 +370,39 @@
             transform: none !important;
         }
 
-        .overlay {
+        /* ФИКС ДЛЯ ОВЕРЛЕЯ И ДИАЛОГА */
+        #osOverlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 999;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
         }
 
-        .os-dialog {
+        #osDialog {
+            position: relative;
             background: linear-gradient(135deg, var(--card-bg) 0%, #363636 100%);
             padding: 40px;
             border-radius: 20px;
-            z-index: 1000;
+            z-index: 1001;
             text-align: center;
             width: 90%;
             max-width: 400px;
             box-shadow: 0 25px 70px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.1);
-            animation: dialogAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: dialogAppear 0.3s ease-out;
         }
 
         @keyframes dialogAppear {
             from {
                 opacity: 0;
-                transform: translateY(-50px) scale(0.8);
+                transform: translateY(-30px) scale(0.95);
             }
             to {
                 opacity: 1;
@@ -429,7 +410,7 @@
             }
         }
 
-        .os-dialog h3 {
+        #osDialog h3 {
             margin-top: 0;
             color: var(--accent-color);
             margin-bottom: 30px;
@@ -478,7 +459,7 @@
             color: white;
             padding: 20px 25px;
             border-radius: 12px;
-            z-index: 1001;
+            z-index: 1002;
             max-width: 400px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.4);
             animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -487,7 +468,6 @@
             align-items: center;
             gap: 15px;
             cursor: pointer;
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
         }
         
@@ -546,10 +526,9 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            z-index: 100;
+            z-index: 999;
             border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            backdrop-filter: blur(15px);
         }
 
         .status-dot {
@@ -658,7 +637,7 @@
                 top: 15px;
             }
             
-            .os-dialog {
+            #osDialog {
                 padding: 30px;
             }
         }
@@ -676,8 +655,6 @@
             font-weight: 600;
             transition: all 0.3s;
             z-index: 99;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .logout-btn:hover {
@@ -696,21 +673,6 @@
             border-radius: 20px;
             font-size: 12px;
             border: 1px solid rgba(33, 150, 243, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .auto-connect {
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #aaa;
-            font-size: 14px;
-        }
-
-        .auto-connect input[type="checkbox"] {
-            width: auto;
-            margin: 0;
         }
     </style>
 </head>
@@ -727,10 +689,6 @@
         <div class="subtitle">Распределение операторов в реальном времени</div>
         
         <input type="text" id="usernameInput" placeholder="Введите ваше имя" autocomplete="off" autofocus>
-        <div class="auto-connect">
-            <input type="checkbox" id="autoConnectCheckbox">
-            <label for="autoConnectCheckbox">Автоподключение при следующем входе</label>
-        </div>
         
         <button class="connect-btn" id="connectButton">
             <span id="connectButtonText">Подключиться к серверу</span>
@@ -740,8 +698,7 @@
             ✅ После подключения вы сможете:<br>
             • Занимать свободных операторов<br>
             • Вставать в очередь к занятым<br>
-            • Получать уведомления в реальном времени<br>
-            • Работать совместно с коллегами
+            • Получать уведомления в реальном времени
         </div>
         
         <div class="server-status" id="serverStatus">
@@ -766,16 +723,12 @@
                 <span class="stat-value" id="queueCount">0</span>
                 <span class="stat-label">🟡 В очереди</span>
             </div>
-            <div class="stat-item">
-                <span class="stat-value" id="userCount">1</span>
-                <span class="stat-label">👥 Пользователей</span>
-            </div>
         </div>
     </div>
 
     <div class="container hidden" id="operatorsContainer"></div>
 
-    <!-- Диалог выбора ОС -->
+    <!-- Диалог выбора ОС (ИСПРАВЛЕННЫЙ) -->
     <div class="overlay hidden" id="osOverlay"></div>
     <div class="os-dialog hidden" id="osDialog">
         <h3>💻 Выберите операционную систему</h3>
@@ -784,12 +737,6 @@
         </button>
         <button class="os-option" data-os="Astra Linux">
             <span>🐧</span> Astra Linux
-        </button>
-        <button class="os-option" data-os="macOS">
-            <span></span> macOS
-        </button>
-        <button class="os-option" data-os="Другая">
-            <span>🔧</span> Другая ОС
         </button>
     </div>
 
@@ -833,16 +780,11 @@
             console.log('🚀 Инициализация приложения...');
             console.log('🌐 Сервер:', SERVER_URL);
             
-            // Восстановить сохраненные данные
+            // Восстановить сохраненное имя
             const savedUsername = localStorage.getItem('operator_username');
-            const autoConnect = localStorage.getItem('operator_autoConnect') === 'true';
             
             if (savedUsername) {
                 document.getElementById('usernameInput').value = savedUsername;
-            }
-            
-            if (autoConnect) {
-                document.getElementById('autoConnectCheckbox').checked = true;
             }
 
             // События формы
@@ -852,29 +794,21 @@
                 if (e.key === 'Enter') connectUser();
             });
 
-            // События диалога ОС
+            // События диалога ОС - ФИКС ЗДЕСЬ!
             document.querySelectorAll('.os-option').forEach(btn => {
-                btn.addEventListener('click', () => selectOS(btn.dataset.os));
+                btn.addEventListener('click', function() {
+                    selectOS(this.getAttribute('data-os'));
+                });
             });
             
             // Закрытие диалога по клику на оверлей
-            document.getElementById('osOverlay').addEventListener('click', () => {
-                hideOSDialog();
-            });
+            document.getElementById('osOverlay').addEventListener('click', hideOSDialog);
             
             // Отслеживание активности вкладки
             document.addEventListener('visibilitychange', handleVisibilityChange);
             
             // Автофокус на поле ввода
             document.getElementById('usernameInput').focus();
-            
-            // Автоподключение если включено
-            if (autoConnect && savedUsername) {
-                setTimeout(() => {
-                    console.log('🔗 Автоподключение...');
-                    connectUser();
-                }, 500);
-            }
             
             console.log('✅ Инициализация завершена');
         }
@@ -890,7 +824,6 @@
             const usernameInput = document.getElementById('usernameInput');
             const connectButton = document.getElementById('connectButton');
             const connectButtonText = document.getElementById('connectButtonText');
-            const autoConnectCheckbox = document.getElementById('autoConnectCheckbox');
             
             const username = usernameInput.value.trim();
             
@@ -901,9 +834,8 @@
                 return;
             }
             
-            // Сохранить настройки
+            // Сохранить имя
             localStorage.setItem('operator_username', username);
-            localStorage.setItem('operator_autoConnect', autoConnectCheckbox.checked);
             
             // Блокируем кнопку
             connectButton.disabled = true;
@@ -963,11 +895,6 @@
                 }, 300);
             });
 
-            // Подтверждение подключения от сервера
-            socket.on('connected', data => {
-                console.log('🔄 Сервер подтвердил подключение');
-            });
-
             // Успешная регистрация пользователя
             socket.on('user_registered', data => {
                 console.log('✅ Пользователь зарегистрирован:', data);
@@ -1014,11 +941,6 @@
                 connectButtonText.textContent = 'Повторить подключение';
                 
                 showToast('Не удалось подключиться к серверу', 'error');
-                
-                reconnectAttempts++;
-                if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-                    showToast('Превышено количество попыток подключения', 'error');
-                }
             });
 
             // Отключение от сервера
@@ -1029,19 +951,12 @@
                 if (reason === 'io server disconnect') {
                     showToast('Сервер отключил соединение', 'error');
                 }
-                
-                if (currentUser) {
-                    showToast('Соединение потеряно. Переподключаемся...', 'warning');
-                }
             });
 
             // Успешное переподключение
             socket.on('reconnect', () => {
                 console.log('🔄 Переподключились к серверу');
                 updateConnectionStatus(true, 'Подключено');
-                
-                // Сброс счетчика
-                reconnectAttempts = 0;
                 
                 if (currentUser) {
                     showToast('✅ Соединение восстановлено', 'success');
@@ -1053,19 +968,6 @@
                         }
                     }, 300);
                 }
-            });
-
-            // Попытка переподключения
-            socket.on('reconnect_attempt', (attemptNumber) => {
-                console.log(`🔄 Попытка переподключения ${attemptNumber}/${MAX_RECONNECT_ATTEMPTS}`);
-                updateConnectionStatus(false, `Переподключение ${attemptNumber}...`);
-            });
-
-            // Ошибка переподключения
-            socket.on('reconnect_failed', () => {
-                console.error('❌ Не удалось переподключиться');
-                updateConnectionStatus(false, 'Ошибка подключения');
-                showToast('Не удалось восстановить соединение с сервером', 'error');
             });
         }
 
@@ -1084,18 +986,23 @@
         }
 
         function showOSDialog(operatorId, isQueue = false) {
+            console.log('📱 Показываем диалог ОС для оператора:', operatorId, isQueue ? '(очередь)' : '(занять)');
             selectedOperatorId = operatorId;
             document.getElementById('osDialog').dataset.queue = isQueue;
+            
+            // ПОРЯДОК ВАЖЕН: сначала оверлей, потом диалог
             document.getElementById('osOverlay').classList.remove('hidden');
             document.getElementById('osDialog').classList.remove('hidden');
         }
 
         function hideOSDialog() {
+            console.log('❌ Закрываем диалог ОС');
             document.getElementById('osOverlay').classList.add('hidden');
             document.getElementById('osDialog').classList.add('hidden');
         }
 
         function selectOS(osType) {
+            console.log('✅ Выбрана ОС:', osType);
             const isQueue = document.getElementById('osDialog').dataset.queue === 'true';
             
             hideOSDialog();
@@ -1107,15 +1014,18 @@
             };
 
             if (isQueue) {
+                console.log('📝 Встаем в очередь с данными:', eventData);
                 socket.emit('join_queue', eventData);
                 showToast('✅ Вы встали в очередь', 'success');
             } else {
+                console.log('🎯 Занимаем оператора с данными:', eventData);
                 socket.emit('occupy_operator', eventData);
                 showToast('✅ Оператор занят', 'success');
             }
         }
 
         function releaseOperator(operatorId) {
+            console.log('🗑️ Освобождаем оператора:', operatorId);
             socket.emit('release_operator', {
                 operator_id: operatorId,
                 username: currentUser
@@ -1164,15 +1074,15 @@
                 `;
 
                 // Очередь
-                const queueList = document.createElement('div');
-                queueList.className = `queue-list ${op.queue.length > 0 ? 'show' : ''}`;
-                
                 if (op.queue.length > 0) {
+                    const queueList = document.createElement('div');
+                    queueList.className = 'queue-list show';
+                    
                     queueList.innerHTML = `
                         <div class="queue-header">
                             <strong>👥 Очередь (${op.queue.length})</strong>
                             <button class="toggle-queue" onclick="this.parentElement.parentElement.classList.toggle('show')">
-                                ${queueList.classList.contains('show') ? '▲' : '▼'}
+                                ▲
                             </button>
                         </div>
                     `;
@@ -1187,8 +1097,8 @@
                             </div>
                         `;
                     });
+                    card.appendChild(queueList);
                 }
-                card.appendChild(queueList);
 
                 // Кнопки действий
                 const btnContainer = document.createElement('div');
@@ -1235,16 +1145,6 @@
             document.getElementById('freeCount').textContent = freeCount;
             document.getElementById('occupiedCount').textContent = occupiedCount;
             document.getElementById('queueCount').textContent = queueCount;
-            document.getElementById('userCount').textContent = operators.reduce((acc, op) => {
-                const users = new Set();
-                if (op.occupied_by) users.add(op.occupied_by);
-                op.queue.forEach(u => users.add(u.username));
-                return acc + users.size;
-            }, 0);
-            
-            // Обновляем статус соединения
-            document.getElementById('connectionState').textContent = 'Подключено';
-            document.getElementById('connectionState').style.color = 'var(--button-free)';
         }
 
         function playNotification() {
@@ -1360,15 +1260,6 @@
                  'status-connecting' : 'status-disconnected');
             
             statusText.textContent = message || (connected ? 'Подключено' : 'Отключено');
-            
-            // Обновляем цвет текста статуса
-            if (connected) {
-                statusText.style.color = 'var(--button-free)';
-            } else if (message.includes('Ошибка')) {
-                statusText.style.color = 'var(--button-busy)';
-            } else {
-                statusText.style.color = 'var(--queue-color)';
-            }
         }
 
         // Функция для выхода из системы
@@ -1393,14 +1284,6 @@
         window.showOSDialog = showOSDialog;
         window.releaseOperator = releaseOperator;
         window.logout = logout;
-
-        // Периодическая проверка соединения
-        setInterval(() => {
-            if (socket && !socket.connected && currentUser) {
-                console.log('🔍 Проверка соединения: отключено, пробуем переподключиться...');
-                socket.connect();
-            }
-        }, 15000);
 
         console.log('✅ Скрипт загружен и готов к работе');
     </script>
