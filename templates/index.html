@@ -30,177 +30,232 @@
             margin: 0;
             padding: 15px;
             min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
         }
 
         .login-form {
             background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 450px;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
             margin: 50px auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
         }
 
-        .login-form h3 {
+        .login-form h2 {
             margin-top: 0;
-            text-align: center;
+            margin-bottom: 25px;
             color: var(--accent-color);
+            font-size: 28px;
+        }
+
+        .login-form .subtitle {
+            color: #aaa;
+            margin-bottom: 25px;
+            font-size: 16px;
         }
 
         .login-form input {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             margin: 12px 0;
             background: var(--input-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
             color: var(--text-color);
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
         .login-form input:focus {
             outline: none;
             border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
         }
 
         .login-form button {
             width: 100%;
-            padding: 14px;
-            background: var(--button-free);
+            padding: 16px;
+            background: linear-gradient(135deg, var(--button-free) 0%, #45a049 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             transition: all 0.3s;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         .login-form button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
         }
 
         .login-form button:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
+        }
+
+        .login-form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         .login-form .hint {
-            margin-top: 15px;
-            font-size: 12px;
+            margin-top: 20px;
+            font-size: 14px;
             color: #aaa;
-            text-align: center;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         .user-header {
             background: linear-gradient(135deg, var(--card-bg) 0%, #363636 100%);
-            padding: 20px;
-            border-radius: 12px;
+            padding: 25px;
+            border-radius: 15px;
             margin: 20px auto;
-            max-width: 900px;
+            max-width: 1200px;
             text-align: center;
             border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         .user-header h2 {
             margin-top: 0;
             color: var(--accent-color);
+            font-size: 26px;
         }
 
         .user-header p {
-            margin: 8px 0;
+            margin: 10px 0;
             color: #ccc;
+            font-size: 16px;
         }
 
         .stats {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-top: 15px;
+            gap: 25px;
+            margin-top: 20px;
             flex-wrap: wrap;
         }
 
         .stat-item {
-            background: rgba(0,0,0,0.2);
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 12px 25px;
+            border-radius: 10px;
             border-left: 4px solid var(--accent-color);
+            min-width: 150px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+            display: block;
+        }
+
+        .stat-item .stat-label {
+            font-size: 14px;
+            color: #aaa;
         }
 
         .container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            max-width: 900px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         .operator-card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 15px;
+            padding: 25px;
             transition: all 0.3s;
             border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .operator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), transparent);
         }
 
         .operator-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             border-color: rgba(255,255,255,0.1);
         }
 
         .operator-card.user-operator {
             border: 2px solid var(--accent-color);
-            box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
+            box-shadow: 0 0 30px rgba(33, 150, 243, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(33, 150, 243, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(33, 150, 243, 0.6); }
         }
 
         .operator-card h3 {
             margin-top: 0;
             color: var(--accent-color);
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
+            padding-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .operator-status {
-            padding: 12px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 10px;
             text-align: center;
-            margin: 15px 0;
+            margin: 20px 0;
             font-weight: 600;
             transition: all 0.3s;
+            backdrop-filter: blur(10px);
         }
 
         .operator-status.free {
             background: linear-gradient(135deg, var(--button-free) 0%, #45a049 100%);
+            color: white;
         }
 
         .operator-status.busy {
             background: linear-gradient(135deg, var(--button-busy) 0%, #d32f2f 100%);
+            color: white;
         }
 
         .queue-list {
-            margin-top: 15px;
-            padding: 15px;
+            margin-top: 20px;
+            padding: 20px;
             background: var(--queue-bg);
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.05);
             display: none;
         }
 
         .queue-list.show {
             display: block;
-            animation: fadeIn 0.5s;
+            animation: slideDown 0.4s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -208,23 +263,26 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
         }
 
         .queue-header strong {
             color: var(--queue-color);
+            font-size: 18px;
         }
 
         .toggle-queue {
             background: transparent;
-            border: 1px solid var(--queue-color);
+            border: 2px solid var(--queue-color);
             color: var(--queue-color);
-            border-radius: 4px;
-            padding: 4px 8px;
+            border-radius: 6px;
+            padding: 6px 12px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
         }
 
         .toggle-queue:hover {
@@ -233,126 +291,137 @@
         }
 
         .queue-item {
-            padding: 8px 12px;
-            margin: 6px 0;
+            padding: 12px 15px;
+            margin: 8px 0;
             background: var(--input-bg);
-            border-radius: 6px;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: all 0.3s;
-            border-left: 3px solid transparent;
+            border-left: 4px solid transparent;
         }
 
         .queue-item.user-queue-item {
             border-left-color: var(--accent-color);
-            background: rgba(33, 150, 243, 0.1);
+            background: linear-gradient(90deg, rgba(33, 150, 243, 0.1), transparent);
+            font-weight: bold;
         }
 
         .queue-item:hover {
             transform: translateX(5px);
+            background: rgba(255,255,255,0.1);
         }
 
         .queue-number {
             color: var(--queue-color);
             font-weight: bold;
-            margin-right: 10px;
-            min-width: 25px;
+            margin-right: 15px;
+            min-width: 30px;
+            font-size: 18px;
         }
 
         .queue-user {
             flex-grow: 1;
+            font-size: 16px;
         }
 
         .queue-os {
-            font-size: 11px;
-            opacity: 0.8;
+            font-size: 12px;
+            opacity: 0.9;
             background: rgba(255,255,255,0.1);
-            padding: 2px 6px;
-            border-radius: 10px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .buttons-container {
+            margin-top: 25px;
         }
 
         button.action-btn {
             width: 100%;
-            padding: 12px;
-            margin: 8px 0;
+            padding: 14px;
+            margin: 10px 0;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         button.action-btn.free {
-            background: var(--button-free);
+            background: linear-gradient(135deg, var(--button-free) 0%, #45a049 100%);
             color: white;
         }
 
-        button.action-btn.free:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        button.action-btn.free:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
         }
 
         button.action-btn.busy {
-            background: var(--button-busy);
+            background: linear-gradient(135deg, var(--button-busy) 0%, #d32f2f 100%);
             color: white;
         }
 
-        button.action-btn.busy:hover {
-            background: #d32f2f;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+        button.action-btn.busy:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(244, 67, 54, 0.3);
         }
 
         button.action-btn.queue {
-            background: var(--queue-color);
+            background: linear-gradient(135deg, var(--queue-color) 0%, #ffcc00 100%);
             color: #000;
         }
 
-        button.action-btn.queue:hover {
-            background: #ffcc00;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        button.action-btn.queue:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
         }
 
-        .buttons-container {
-            margin-top: 20px;
+        button.action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
-        /* ФИКС ДЛЯ ДИАЛОГА */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.9);
             z-index: 999;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
 
         .os-dialog {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #363636 100%);
+            padding: 40px;
+            border-radius: 20px;
             z-index: 1000;
             text-align: center;
             width: 90%;
-            max-width: 350px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 400px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.1);
-            animation: dialogAppear 0.4s ease-out;
+            animation: dialogAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes dialogAppear {
             from {
                 opacity: 0;
-                transform: translateY(-30px) scale(0.9);
+                transform: translateY(-50px) scale(0.8);
             }
             to {
                 opacity: 1;
@@ -363,32 +432,38 @@
         .os-dialog h3 {
             margin-top: 0;
             color: var(--accent-color);
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            font-size: 24px;
         }
 
         .os-option {
-            padding: 16px;
-            margin: 10px 0;
+            padding: 18px;
+            margin: 12px 0;
             width: 100%;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             background: var(--input-bg);
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
             transition: all 0.3s;
             border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
 
         .os-option:hover {
             background: var(--accent-color);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(33, 150, 243, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(33, 150, 243, 0.3);
+            border-color: white;
         }
 
         .os-option:active {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
         .hidden {
@@ -397,43 +472,45 @@
         
         .toast-notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--accent-color);
+            top: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, var(--accent-color) 0%, #1976D2 100%);
             color: white;
-            padding: 18px 20px;
-            border-radius: 10px;
+            padding: 20px 25px;
+            border-radius: 12px;
             z-index: 1001;
-            max-width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: slideIn 0.4s ease-out;
-            border-left: 5px solid white;
+            max-width: 400px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-left: 6px solid white;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
             cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .toast-notification.error {
-            background: var(--error-color);
+            background: linear-gradient(135deg, var(--error-color) 0%, #cc0000 100%);
         }
         
         .toast-notification.success {
-            background: var(--success-color);
+            background: linear-gradient(135deg, var(--success-color) 0%, #007E33 100%);
         }
         
         .toast-notification.warning {
-            background: var(--queue-color);
+            background: linear-gradient(135deg, var(--queue-color) 0%, #FF8800 100%);
             color: #000;
         }
         
         @keyframes slideIn {
             from {
-                transform: translateX(100%);
+                transform: translateX(100%) translateY(-20px);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateX(0) translateY(0);
                 opacity: 1;
             }
         }
@@ -454,37 +531,49 @@
         }
 
         .toast-icon {
-            font-size: 20px;
+            font-size: 24px;
+            flex-shrink: 0;
         }
 
         .connection-status {
             position: fixed;
-            top: 15px;
-            left: 15px;
-            background: var(--card-bg);
-            padding: 10px 18px;
-            border-radius: 25px;
+            top: 20px;
+            left: 20px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 12px 22px;
+            border-radius: 30px;
             font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             z-index: 100;
             border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            backdrop-filter: blur(15px);
         }
 
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             position: relative;
         }
 
         .status-connected {
             background: var(--button-free);
-            box-shadow: 0 0 10px var(--button-free);
-            animation: pulse 2s infinite;
+            box-shadow: 0 0 15px var(--button-free);
+            animation: pulseDot 2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: scale(1.2);
+            }
         }
 
         .status-disconnected {
@@ -493,28 +582,17 @@
 
         .status-connecting {
             background: var(--queue-color);
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { 
-                opacity: 1; 
-                transform: scale(1);
-            }
-            50% { 
-                opacity: 0.7; 
-                transform: scale(1.1);
-            }
+            animation: pulse 1.5s infinite;
         }
 
         .loading {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: var(--accent-color);
-            animation: spin 1s ease-in-out infinite;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
@@ -528,15 +606,16 @@
             }
             
             .connection-status {
-                top: 10px;
-                left: 10px;
-                right: 10px;
+                top: 15px;
+                left: 15px;
+                right: 15px;
                 justify-content: center;
+                padding: 10px;
             }
             
             .user-header {
-                margin: 10px auto;
-                padding: 15px;
+                margin: 15px auto;
+                padding: 20px;
             }
             
             .stats {
@@ -544,43 +623,94 @@
             }
             
             .stat-item {
-                padding: 8px 15px;
-                font-size: 14px;
+                min-width: 120px;
+                padding: 10px 15px;
+            }
+            
+            .stat-item .stat-value {
+                font-size: 20px;
+            }
+            
+            .login-form {
+                padding: 25px;
+                margin: 30px auto;
             }
         }
 
         @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
             .login-form {
-                margin: 20px auto;
                 padding: 20px;
+                margin: 20px auto;
             }
             
             .operator-card {
-                padding: 15px;
+                padding: 20px;
             }
             
             .toast-notification {
                 left: 15px;
                 right: 15px;
                 max-width: none;
+                top: 15px;
+            }
+            
+            .os-dialog {
+                padding: 30px;
             }
         }
 
-        .server-status {
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            z-index: 99;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logout-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(244, 67, 54, 0.3);
+        }
+
+        .server-info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(33, 150, 243, 0.1);
+            color: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 20px;
             font-size: 12px;
-            color: #aaa;
-            text-align: center;
-            margin-top: 5px;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            backdrop-filter: blur(10px);
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 10px;
+        .auto-connect {
             margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #aaa;
+            font-size: 14px;
         }
 
-        .action-buttons button {
-            flex: 1;
+        .auto-connect input[type="checkbox"] {
+            width: auto;
+            margin: 0;
         }
     </style>
 </head>
@@ -593,38 +723,52 @@
 
     <!-- Форма входа -->
     <div class="login-form" id="loginForm">
-        <h3>🎮 Система управления операторами</h3>
+        <h2>🎮 Система управления операторами</h2>
+        <div class="subtitle">Распределение операторов в реальном времени</div>
+        
         <input type="text" id="usernameInput" placeholder="Введите ваше имя" autocomplete="off" autofocus>
-        <input type="text" id="serverIpInput" placeholder="Домен сервера (напр. operator-app-yn89.onrender.com)" 
-               value="operator-app-yn89.onrender.com" autocomplete="off">
-        <button class="connect-btn" id="connectButton">
-            <span id="connectButtonText">Подключиться</span>
-        </button>
-        <div class="hint">
-            ✨ После подключения вы сможете занимать операторов и вставать в очередь.<br>
-            🔄 Приложение обновляется в реальном времени.
+        <div class="auto-connect">
+            <input type="checkbox" id="autoConnectCheckbox">
+            <label for="autoConnectCheckbox">Автоподключение при следующем входе</label>
         </div>
+        
+        <button class="connect-btn" id="connectButton">
+            <span id="connectButtonText">Подключиться к серверу</span>
+        </button>
+        
+        <div class="hint">
+            ✅ После подключения вы сможете:<br>
+            • Занимать свободных операторов<br>
+            • Вставать в очередь к занятым<br>
+            • Получать уведомления в реальном времени<br>
+            • Работать совместно с коллегами
+        </div>
+        
         <div class="server-status" id="serverStatus">
-            Ожидание подключения...
+            Сервер: <strong>operator-app-yn89.onrender.com</strong>
         </div>
     </div>
 
     <!-- Основной интерфейс -->
     <div class="user-header hidden" id="userHeader">
-        <h2>👤 Пользователь: <span id="currentUser" style="color: var(--accent-color)"></span></h2>
-        <p>🌐 Сервер: <span id="serverAddress"></span> | 📊 Статус: <span id="connectionState">Подключено</span></p>
+        <h2>👤 Вы вошли как: <span id="currentUser" style="color: var(--accent-color)"></span></h2>
+        <p>🌐 Сервер: <span id="serverAddress">operator-app-yn89.onrender.com</span> | 📊 Статус: <span id="connectionState" style="color: var(--button-free)">Подключено</span></p>
         <div class="stats">
             <div class="stat-item">
-                🟢 Свободно: <span id="freeCount">0</span>
+                <span class="stat-value" id="freeCount">0</span>
+                <span class="stat-label">🟢 Свободно</span>
             </div>
             <div class="stat-item">
-                🔴 Занято: <span id="occupiedCount">0</span>
+                <span class="stat-value" id="occupiedCount">0</span>
+                <span class="stat-label">🔴 Занято</span>
             </div>
             <div class="stat-item">
-                🟡 В очереди: <span id="queueCount">0</span>
+                <span class="stat-value" id="queueCount">0</span>
+                <span class="stat-label">🟡 В очереди</span>
             </div>
             <div class="stat-item">
-                👥 Пользователей: <span id="userCount">1</span>
+                <span class="stat-value" id="userCount">1</span>
+                <span class="stat-label">👥 Пользователей</span>
             </div>
         </div>
     </div>
@@ -636,17 +780,25 @@
     <div class="os-dialog hidden" id="osDialog">
         <h3>💻 Выберите операционную систему</h3>
         <button class="os-option" data-os="Windows">
-            🪟 Windows
+            <span>🪟</span> Windows
         </button>
         <button class="os-option" data-os="Astra Linux">
-            🐧 Astra Linux
+            <span>🐧</span> Astra Linux
         </button>
-        <button class="os-option" data-os="macOS" style="margin-top: 20px;">
-             macOS
+        <button class="os-option" data-os="macOS">
+            <span></span> macOS
         </button>
-        <button class="os-option" data-os="Другая" style="background: transparent; border: 2px solid var(--input-bg);">
-            🔧 Другая
+        <button class="os-option" data-os="Другая">
+            <span>🔧</span> Другая ОС
         </button>
+    </div>
+
+    <!-- Кнопка выхода -->
+    <button class="logout-btn hidden" id="logoutButton" onclick="logout()">🚪 Выйти</button>
+
+    <!-- Информация о сервере -->
+    <div class="server-info hidden" id="serverInfo">
+        Сервер: operator-app-yn89.onrender.com
     </div>
 
     <!-- Аудио для уведомлений -->
@@ -663,41 +815,40 @@
         let currentUser = null;
         let selectedOperatorId = null;
         let socket = null;
-        let serverIp = 'operator-app-yn89.onrender.com';
         let originalTitle = document.title;
         let originalFavicon = document.querySelector('link[rel="icon"]').href;
         let blinkInterval = null;
         let isTabActive = true;
         let reconnectAttempts = 0;
         const MAX_RECONNECT_ATTEMPTS = 5;
+        
+        // Ваш сервер Render
+        const RENDER_SERVER = 'operator-app-yn89.onrender.com';
+        const SERVER_URL = `https://${RENDER_SERVER}`;
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', init);
 
         function init() {
-            console.log('Инициализация приложения...');
+            console.log('🚀 Инициализация приложения...');
+            console.log('🌐 Сервер:', SERVER_URL);
             
             // Восстановить сохраненные данные
-            const savedIp = localStorage.getItem('lastServerIp');
-            const savedUsername = localStorage.getItem('lastUsername');
-            
-            if (savedIp) {
-                document.getElementById('serverIpInput').value = savedIp;
-                serverIp = savedIp;
-            }
+            const savedUsername = localStorage.getItem('operator_username');
+            const autoConnect = localStorage.getItem('operator_autoConnect') === 'true';
             
             if (savedUsername) {
                 document.getElementById('usernameInput').value = savedUsername;
+            }
+            
+            if (autoConnect) {
+                document.getElementById('autoConnectCheckbox').checked = true;
             }
 
             // События формы
             document.getElementById('connectButton').addEventListener('click', connectUser);
             
             document.getElementById('usernameInput').addEventListener('keypress', e => {
-                if (e.key === 'Enter') connectUser();
-            });
-            
-            document.getElementById('serverIpInput').addEventListener('keypress', e => {
                 if (e.key === 'Enter') connectUser();
             });
 
@@ -717,24 +868,15 @@
             // Автофокус на поле ввода
             document.getElementById('usernameInput').focus();
             
-            // Проверить, может быть уже есть параметры в URL
-            checkUrlParams();
-            
-            console.log('Инициализация завершена');
-        }
-
-        function checkUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const username = urlParams.get('username');
-            const server = urlParams.get('server');
-            
-            if (username) {
-                document.getElementById('usernameInput').value = username;
+            // Автоподключение если включено
+            if (autoConnect && savedUsername) {
+                setTimeout(() => {
+                    console.log('🔗 Автоподключение...');
+                    connectUser();
+                }, 500);
             }
-            if (server) {
-                document.getElementById('serverIpInput').value = server;
-                serverIp = server;
-            }
+            
+            console.log('✅ Инициализация завершена');
         }
 
         function handleVisibilityChange() {
@@ -746,12 +888,11 @@
 
         function connectUser() {
             const usernameInput = document.getElementById('usernameInput');
-            const serverInput = document.getElementById('serverIpInput');
             const connectButton = document.getElementById('connectButton');
             const connectButtonText = document.getElementById('connectButtonText');
+            const autoConnectCheckbox = document.getElementById('autoConnectCheckbox');
             
             const username = usernameInput.value.trim();
-            serverIp = serverInput.value.trim();
             
             // Валидация
             if (!username) {
@@ -760,15 +901,9 @@
                 return;
             }
             
-            if (!serverIp) {
-                showToast('Введите адрес сервера', 'error');
-                serverInput.focus();
-                return;
-            }
-            
             // Сохранить настройки
-            localStorage.setItem('lastServerIp', serverIp);
-            localStorage.setItem('lastUsername', username);
+            localStorage.setItem('operator_username', username);
+            localStorage.setItem('operator_autoConnect', autoConnectCheckbox.checked);
             
             // Блокируем кнопку
             connectButton.disabled = true;
@@ -776,7 +911,6 @@
             
             // Обновляем статус
             updateConnectionStatus(false, 'Подключение...');
-            document.getElementById('serverStatus').textContent = 'Устанавливаем соединение...';
             
             // Закрыть старое соединение если есть
             if (socket) {
@@ -792,19 +926,10 @@
         }
 
         function connectToServer(username) {
-            // Нормализуем URL сервера
-            let serverAddress = serverIp;
-            if (!serverAddress.startsWith('http://') && !serverAddress.startsWith('https://')) {
-                serverAddress = `https://${serverAddress}`;
-            }
-            
-            // Убираем trailing slash
-            serverAddress = serverAddress.replace(/\/$/, '');
-            
-            console.log('Подключение к серверу:', serverAddress);
+            console.log('🔗 Подключение к серверу:', SERVER_URL);
             
             // Создаем подключение
-            socket = io(serverAddress, {
+            socket = io(SERVER_URL, {
                 transports: ['websocket', 'polling'],
                 reconnection: true,
                 reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
@@ -822,27 +947,25 @@
             socket.on('connect', () => {
                 console.log('✅ Socket.IO подключен, ID:', socket.id);
                 updateConnectionStatus(true, 'Подключено');
-                document.getElementById('serverStatus').textContent = 'Соединение установлено';
-                showToast('Подключено к серверу', 'success');
                 
                 // Разблокируем кнопку
                 const connectButton = document.getElementById('connectButton');
                 const connectButtonText = document.getElementById('connectButtonText');
                 connectButton.disabled = false;
-                connectButtonText.textContent = 'Подключиться';
+                connectButtonText.textContent = 'Подключиться к серверу';
                 
-                // Регистрируем пользователя через 500мс
+                // Регистрируем пользователя
                 setTimeout(() => {
                     if (socket && socket.connected) {
                         console.log('📝 Регистрируем пользователя:', username);
                         socket.emit('set_username', username);
                     }
-                }, 500);
+                }, 300);
             });
 
             // Подтверждение подключения от сервера
             socket.on('connected', data => {
-                console.log('🔄 Сервер подтвердил подключение:', data);
+                console.log('🔄 Сервер подтвердил подключение');
             });
 
             // Успешная регистрация пользователя
@@ -850,10 +973,7 @@
                 console.log('✅ Пользователь зарегистрирован:', data);
                 currentUser = data.username;
                 showMainInterface();
-                showToast(`Добро пожаловать, ${data.username}!`, 'success');
-                
-                // Обновляем счетчик пользователей
-                updateUserCount(1);
+                showToast(`🎉 Добро пожаловать, ${data.username}!`, 'success');
             });
 
             // Ошибка регистрации
@@ -865,7 +985,7 @@
                 const connectButton = document.getElementById('connectButton');
                 const connectButtonText = document.getElementById('connectButtonText');
                 connectButton.disabled = false;
-                connectButtonText.textContent = 'Подключиться';
+                connectButtonText.textContent = 'Подключиться к серверу';
             });
 
             // Обновление списка операторов
@@ -886,7 +1006,6 @@
             socket.on('connect_error', err => {
                 console.error('❌ Ошибка подключения:', err);
                 updateConnectionStatus(false, 'Ошибка подключения');
-                document.getElementById('serverStatus').textContent = 'Ошибка подключения';
                 
                 // Разблокируем кнопку
                 const connectButton = document.getElementById('connectButton');
@@ -894,7 +1013,7 @@
                 connectButton.disabled = false;
                 connectButtonText.textContent = 'Повторить подключение';
                 
-                showToast('Не удалось подключиться к серверу. Проверьте адрес.', 'error');
+                showToast('Не удалось подключиться к серверу', 'error');
                 
                 reconnectAttempts++;
                 if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
@@ -906,7 +1025,6 @@
             socket.on('disconnect', (reason) => {
                 console.log('🔌 Отключились от сервера:', reason);
                 updateConnectionStatus(false, 'Отключено');
-                document.getElementById('serverStatus').textContent = 'Соединение разорвано';
                 
                 if (reason === 'io server disconnect') {
                     showToast('Сервер отключил соединение', 'error');
@@ -921,13 +1039,12 @@
             socket.on('reconnect', () => {
                 console.log('🔄 Переподключились к серверу');
                 updateConnectionStatus(true, 'Подключено');
-                document.getElementById('serverStatus').textContent = 'Переподключено';
                 
                 // Сброс счетчика
                 reconnectAttempts = 0;
                 
                 if (currentUser) {
-                    showToast('Соединение восстановлено', 'success');
+                    showToast('✅ Соединение восстановлено', 'success');
                     
                     // Повторно регистрируемся
                     setTimeout(() => {
@@ -942,20 +1059,13 @@
             socket.on('reconnect_attempt', (attemptNumber) => {
                 console.log(`🔄 Попытка переподключения ${attemptNumber}/${MAX_RECONNECT_ATTEMPTS}`);
                 updateConnectionStatus(false, `Переподключение ${attemptNumber}...`);
-                document.getElementById('serverStatus').textContent = `Попытка ${attemptNumber}...`;
             });
 
             // Ошибка переподключения
             socket.on('reconnect_failed', () => {
                 console.error('❌ Не удалось переподключиться');
                 updateConnectionStatus(false, 'Ошибка подключения');
-                document.getElementById('serverStatus').textContent = 'Не удалось восстановить соединение';
                 showToast('Не удалось восстановить соединение с сервером', 'error');
-            });
-
-            // Пинг  понг для поддержания соединения
-            socket.on('pong', () => {
-                console.log('🏓 Pong получен');
             });
         }
 
@@ -963,9 +1073,11 @@
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('userHeader').classList.remove('hidden');
             document.getElementById('operatorsContainer').classList.remove('hidden');
+            document.getElementById('logoutButton').classList.remove('hidden');
+            document.getElementById('serverInfo').classList.remove('hidden');
             
             document.getElementById('currentUser').textContent = currentUser;
-            document.getElementById('serverAddress').textContent = serverIp;
+            document.getElementById('serverAddress').textContent = RENDER_SERVER;
             
             // Обновляем статус в заголовке
             updateConnectionStatus(true, 'Подключено');
@@ -996,10 +1108,10 @@
 
             if (isQueue) {
                 socket.emit('join_queue', eventData);
-                showToast('Вы встали в очередь', 'success');
+                showToast('✅ Вы встали в очередь', 'success');
             } else {
                 socket.emit('occupy_operator', eventData);
-                showToast('Оператор занят', 'success');
+                showToast('✅ Оператор занят', 'success');
             }
         }
 
@@ -1008,7 +1120,7 @@
                 operator_id: operatorId,
                 username: currentUser
             });
-            showToast('Оператор освобожден', 'success');
+            showToast('✅ Оператор освобожден', 'success');
         }
 
         function updateOperators(operators) {
@@ -1020,7 +1132,6 @@
             let freeCount = 0;
             let occupiedCount = 0;
             let queueCount = 0;
-            let userInQueueCount = 0;
             
             operators.forEach(op => {
                 const isUserOperator = op.occupied_by === currentUser;
@@ -1035,7 +1146,6 @@
                     freeCount++;
                 }
                 queueCount += op.queue.length;
-                if (isInQueue) userInQueueCount++;
                 
                 // Создание карточки оператора
                 const card = document.createElement('div');
@@ -1092,17 +1202,13 @@
                                 🗑️ Освободить оператора
                             </button>
                         `;
-                        occupiedCount++;
                     } else if (isInQueue) {
                         // Пользователь в очереди к этому оператору
                         btnContainer.innerHTML = `
-                            <div style="text-align: center; padding: 10px; background: rgba(255,215,0,0.1); border-radius: 8px; margin-bottom: 10px;">
-                                Вы в очереди 🎯<br>
-                                <strong>Позиция: ${queuePosition}</strong>
+                            <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.2), transparent); border-radius: 10px; margin-bottom: 15px; border: 2px solid var(--queue-color);">
+                                <div style="font-size: 18px; color: var(--queue-color); margin-bottom: 5px;">🎯 Вы в очереди</div>
+                                <div style="font-size: 24px; font-weight: bold; color: var(--queue-color);">Позиция: ${queuePosition}</div>
                             </div>
-                            <button class="action-btn busy" onclick="releaseOperator('${op.id}')" style="display: none;">
-                                Освободить
-                            </button>
                         `;
                     } else {
                         // Оператор занят другим пользователем
@@ -1129,16 +1235,16 @@
             document.getElementById('freeCount').textContent = freeCount;
             document.getElementById('occupiedCount').textContent = occupiedCount;
             document.getElementById('queueCount').textContent = queueCount;
+            document.getElementById('userCount').textContent = operators.reduce((acc, op) => {
+                const users = new Set();
+                if (op.occupied_by) users.add(op.occupied_by);
+                op.queue.forEach(u => users.add(u.username));
+                return acc + users.size;
+            }, 0);
             
             // Обновляем статус соединения
-            if (socket && socket.connected) {
-                document.getElementById('connectionState').textContent = 'Подключено';
-                document.getElementById('connectionState').style.color = 'var(--button-free)';
-            }
-        }
-
-        function updateUserCount(count) {
-            document.getElementById('userCount').textContent = count;
+            document.getElementById('connectionState').textContent = 'Подключено';
+            document.getElementById('connectionState').style.color = 'var(--button-free)';
         }
 
         function playNotification() {
@@ -1151,23 +1257,11 @@
                 
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
-                        console.log('Автовоспроизведение звука заблокировано');
-                        // Показываем кнопку для разрешения звука
-                        if (!document.querySelector('.enable-sound-btn')) {
-                            const soundBtn = document.createElement('button');
-                            soundBtn.className = 'enable-sound-btn';
-                            soundBtn.textContent = '🔔 Включить звук';
-                            soundBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 1000;';
-                            soundBtn.onclick = () => {
-                                notificationSound.play();
-                                soundBtn.remove();
-                            };
-                            document.body.appendChild(soundBtn);
-                        }
+                        console.log('🔇 Автовоспроизведение звука заблокировано');
                     });
                 }
             } catch (error) {
-                console.log('Ошибка воспроизведения звука:', error);
+                console.log('❌ Ошибка воспроизведения звука:', error);
             }
         }
 
@@ -1228,7 +1322,7 @@
             toast.className = `toast-notification ${type}`;
             toast.innerHTML = `
                 <span class="toast-icon">${icon}</span>
-                <span>${message}</span>
+                <span style="flex-grow: 1;">${message}</span>
             `;
             
             document.body.appendChild(toast);
@@ -1287,36 +1381,28 @@
             document.getElementById('loginForm').classList.remove('hidden');
             document.getElementById('userHeader').classList.add('hidden');
             document.getElementById('operatorsContainer').classList.add('hidden');
+            document.getElementById('logoutButton').classList.add('hidden');
+            document.getElementById('serverInfo').classList.add('hidden');
             
             document.getElementById('usernameInput').focus();
             
             showToast('Вы вышли из системы', 'info');
         }
 
-        // Функция для переподключения
-        function reconnect() {
-            if (currentUser && socket) {
-                socket.connect();
-                showToast('Переподключаемся...', 'info');
-            }
-        }
-
         // Экспорт функций для вызова из onclick
         window.showOSDialog = showOSDialog;
         window.releaseOperator = releaseOperator;
         window.logout = logout;
-        window.reconnect = reconnect;
 
         // Периодическая проверка соединения
         setInterval(() => {
             if (socket && !socket.connected && currentUser) {
-                console.log('Проверка соединения: отключено, пробуем переподключиться...');
+                console.log('🔍 Проверка соединения: отключено, пробуем переподключиться...');
                 socket.connect();
             }
-        }, 10000);
+        }, 15000);
 
-        console.log('Скрипт загружен');
+        console.log('✅ Скрипт загружен и готов к работе');
     </script>
 </body>
 </html>
-
