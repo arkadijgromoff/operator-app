@@ -823,537 +823,601 @@
     <!-- Socket.io -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-    <script>
-        // Глобальные переменные
-        let currentUser = null;
-        let selectedOperatorId = null;
-        let socket = null;
-        let originalTitle = document.title;
-        let originalFavicon = document.querySelector('link[rel="icon"]').href;
-        let blinkInterval = null;
-        let isTabActive = true;
-        let reconnectAttempts = 0;
-        const MAX_RECONNECT_ATTEMPTS = 5;
+    <!-- Остальная часть HTML остается такой же, только обновляем JavaScript -->
+
+<script>
+    // Глобальные переменные
+    let currentUser = null;
+    let selectedOperatorId = null;
+    let socket = null;
+    let originalTitle = document.title;
+    let originalFavicon = document.querySelector('link[rel="icon"]').href;
+    let blinkInterval = null;
+    let isTabActive = true;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 5;
+    let heartbeatInterval = null;
+    
+    // Ваш сервер Render
+    const RENDER_SERVER = 'operator-app-yn89.onrender.com';
+    const SERVER_URL = `https://${RENDER_SERVER}`;
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', init);
+
+    function init() {
+        console.log('🚀 Инициализация приложения...');
+        console.log('🌐 Сервер:', SERVER_URL);
         
-        // Ваш сервер Render
-        const RENDER_SERVER = 'operator-app-yn89.onrender.com';
-        const SERVER_URL = `https://${RENDER_SERVER}`;
-
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', init);
-
-        function init() {
-            console.log('🚀 Инициализация приложения...');
-            console.log('🌐 Сервер:', SERVER_URL);
-            
-            // Восстановить сохраненное имя
-            const savedUsername = localStorage.getItem('operator_username');
-            
-            if (savedUsername) {
-                document.getElementById('usernameInput').value = savedUsername;
-            }
-
-            // События формы
-            document.getElementById('connectButton').addEventListener('click', connectUser);
-            
-            document.getElementById('usernameInput').addEventListener('keypress', e => {
-                if (e.key === 'Enter') connectUser();
-            });
-
-            // События диалога ОС
-            document.querySelectorAll('.os-option').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    selectOS(this.getAttribute('data-os'));
-                });
-            });
-            
-            // Закрытие диалога по клику на оверлей
-            document.getElementById('osOverlay').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    hideOSDialog();
-                }
-            });
-            
-            // Отслеживание активности вкладки
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-            
-            // Автофокус на поле ввода
-            document.getElementById('usernameInput').focus();
-            
-            console.log('✅ Инициализация завершена');
+        // Восстановить сохраненное имя
+        const savedUsername = localStorage.getItem('operator_username');
+        
+        if (savedUsername) {
+            document.getElementById('usernameInput').value = savedUsername;
         }
 
-        function handleVisibilityChange() {
-            isTabActive = !document.hidden;
-            if (isTabActive && blinkInterval) {
-                stopTitleBlinking();
-            }
-        }
+        // События формы
+        document.getElementById('connectButton').addEventListener('click', connectUser);
+        
+        document.getElementById('usernameInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') connectUser();
+        });
 
-        function connectUser() {
-            const usernameInput = document.getElementById('usernameInput');
+        // События диалога ОС
+        document.querySelectorAll('.os-option').forEach(btn => {
+            btn.addEventListener('click', function() {
+                selectOS(this.getAttribute('data-os'));
+            });
+        });
+        
+        // Закрытие диалога по клику на оверлей
+        document.getElementById('osOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideOSDialog();
+            }
+        });
+        
+        // Отслеживание активности вкладки
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // Автофокус на поле ввода
+        document.getElementById('usernameInput').focus();
+        
+        console.log('✅ Инициализация завершена');
+    }
+
+    function handleVisibilityChange() {
+        isTabActive = !document.hidden;
+        if (isTabActive && blinkInterval) {
+            stopTitleBlinking();
+        }
+    }
+
+    function connectUser() {
+        const usernameInput = document.getElementById('usernameInput');
+        const connectButton = document.getElementById('connectButton');
+        const connectButtonText = document.getElementById('connectButtonText');
+        
+        const username = usernameInput.value.trim();
+        
+        // Валидация
+        if (!username) {
+            showToast('Введите имя пользователя', 'error');
+            usernameInput.focus();
+            return;
+        }
+        
+        // Сохранить имя
+        localStorage.setItem('operator_username', username);
+        
+        // Блокируем кнопку
+        connectButton.disabled = true;
+        connectButtonText.innerHTML = '<span class="loading"></span> Подключение...';
+        
+        // Обновляем статус
+        updateConnectionStatus(false, 'Подключение...');
+        
+        // Закрыть старое соединение если есть
+        if (socket) {
+            socket.disconnect();
+            socket = null;
+        }
+        
+        // Остановить старый heartbeat
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+        }
+        
+        // Сбрасываем счетчик переподключений
+        reconnectAttempts = 0;
+        
+        // Подключиться к серверу
+        connectToServer(username);
+    }
+
+    function connectToServer(username) {
+        console.log('🔗 Подключение к серверу:', SERVER_URL);
+        
+        // Создаем подключение
+        socket = io(SERVER_URL, {
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 30000,
+            path: '/socket.io/',
+            withCredentials: false,
+            forceNew: true
+        });
+
+        // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
+
+        // Успешное подключение
+        socket.on('connect', () => {
+            console.log('✅ Socket.IO подключен, ID:', socket.id);
+            updateConnectionStatus(true, 'Подключено');
+            
+            // Разблокируем кнопку
             const connectButton = document.getElementById('connectButton');
             const connectButtonText = document.getElementById('connectButtonText');
+            connectButton.disabled = false;
+            connectButtonText.textContent = 'Подключиться к серверу';
             
-            const username = usernameInput.value.trim();
-            
-            // Валидация
-            if (!username) {
-                showToast('Введите имя пользователя', 'error');
-                usernameInput.focus();
-                return;
-            }
-            
-            // Сохранить имя
-            localStorage.setItem('operator_username', username);
-            
-            // Блокируем кнопку
-            connectButton.disabled = true;
-            connectButtonText.innerHTML = '<span class="loading"></span> Подключение...';
-            
-            // Обновляем статус
-            updateConnectionStatus(false, 'Подключение...');
-            
-            // Закрыть старое соединение если есть
-            if (socket) {
-                socket.disconnect();
-                socket = null;
-            }
-            
-            // Сбрасываем счетчик переподключений
-            reconnectAttempts = 0;
-            
-            // Подключиться к серверу
-            connectToServer(username);
-        }
+            // Регистрируем пользователя
+            setTimeout(() => {
+                if (socket && socket.connected) {
+                    console.log('📝 Регистрируем пользователя:', username);
+                    socket.emit('set_username', {username: username});
+                }
+            }, 300);
+        });
 
-        function connectToServer(username) {
-            console.log('🔗 Подключение к серверу:', SERVER_URL);
+        // Успешная регистрация пользователя
+        socket.on('user_registered', data => {
+            console.log('✅ Пользователь зарегистрирован:', data);
+            currentUser = data.username;
             
-            // Создаем подключение
-            socket = io(SERVER_URL, {
-                transports: ['websocket', 'polling'],
-                reconnection: true,
-                reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
-                timeout: 30000,
-                path: '/socket.io/',
-                withCredentials: false,
-                forceNew: true
-            });
-
-            // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
-
-            // Успешное подключение
-            socket.on('connect', () => {
-                console.log('✅ Socket.IO подключен, ID:', socket.id);
-                updateConnectionStatus(true, 'Подключено');
+            // Запускаем heartbeat для поддержания сессии
+            startHeartbeat();
+            
+            showMainInterface();
+            
+            // Показываем восстановленные данные
+            if (data.restored_data) {
+                let message = `🎉 Добро пожаловать, ${data.username}!`;
                 
-                // Разблокируем кнопку
-                const connectButton = document.getElementById('connectButton');
-                const connectButtonText = document.getElementById('connectButtonText');
-                connectButton.disabled = false;
-                connectButtonText.textContent = 'Подключиться к серверу';
+                if (data.restored_data.occupied_operators.length > 0) {
+                    message += `\n✅ Восстановлены занятые операторы: ${data.restored_data.occupied_operators.join(', ')}`;
+                }
                 
-                // Регистрируем пользователя
+                if (data.restored_data.queues.length > 0) {
+                    const queueInfo = data.restored_data.queues.map(q => 
+                        `${q.operator_name} (позиция: ${q.position})`
+                    ).join(', ');
+                    message += `\n📝 Восстановлены очереди: ${queueInfo}`;
+                }
+                
+                showToast(message, 'success');
+            } else {
+                showToast(`🎉 Добро пожаловать, ${data.username}!`, 'success');
+            }
+        });
+
+        // Ошибка регистрации
+        socket.on('registration_error', data => {
+            console.error('❌ Ошибка регистрации:', data);
+            showToast(data.error || 'Ошибка регистрации', 'error');
+            
+            // Разблокируем кнопку
+            const connectButton = document.getElementById('connectButton');
+            const connectButtonText = document.getElementById('connectButtonText');
+            connectButton.disabled = false;
+            connectButtonText.textContent = 'Подключиться к серверу';
+        });
+
+        // Обновление списка операторов
+        socket.on('operators_update', updateOperators);
+
+        // Продвижение в очереди
+        socket.on('queue_advanced', data => {
+            console.log('🔔 Уведомление о очереди:', data);
+            
+            if (data.username === currentUser) {
+                playNotification();
+                showTitleAlert(data.operator_name);
+                showToast(`🎉 Оператор "${data.operator_name}" свободен! Займите его.`, 'warning');
+            }
+        });
+
+        // Ответ на heartbeat
+        socket.on('heartbeat_response', () => {
+            console.log('💓 Heartbeat подтвержден сервером');
+        });
+
+        // Keep-alive от сервера
+        socket.on('server_keepalive', data => {
+            console.log('🔄 Keep-alive от сервера:', data);
+        });
+
+        // Ошибка подключения
+        socket.on('connect_error', err => {
+            console.error('❌ Ошибка подключения:', err);
+            updateConnectionStatus(false, 'Ошибка подключения');
+            
+            // Разблокируем кнопку
+            const connectButton = document.getElementById('connectButton');
+            const connectButtonText = document.getElementById('connectButtonText');
+            connectButton.disabled = false;
+            connectButtonText.textContent = 'Повторить подключение';
+            
+            showToast('Не удалось подключиться к серверу', 'error');
+        });
+
+        // Отключение от сервера
+        socket.on('disconnect', (reason) => {
+            console.log('🔌 Отключились от сервера:', reason);
+            updateConnectionStatus(false, 'Отключено');
+            
+            if (reason === 'io server disconnect') {
+                showToast('Сервер отключил соединение', 'error');
+            }
+        });
+
+        // Успешное переподключение
+        socket.on('reconnect', () => {
+            console.log('🔄 Переподключились к серверу');
+            updateConnectionStatus(true, 'Подключено');
+            
+            if (currentUser) {
+                showToast('✅ Соединение восстановлено', 'success');
+                
+                // Повторно регистрируемся
                 setTimeout(() => {
                     if (socket && socket.connected) {
-                        console.log('📝 Регистрируем пользователя:', username);
-                        socket.emit('set_username', username);
+                        socket.emit('set_username', {username: currentUser});
                     }
                 }, 300);
-            });
-
-            // Успешная регистрация пользователя
-            socket.on('user_registered', data => {
-                console.log('✅ Пользователь зарегистрирован:', data);
-                currentUser = data.username;
-                showMainInterface();
-                showToast(`🎉 Добро пожаловать, ${data.username}!`, 'success');
-            });
-
-            // Ошибка регистрации
-            socket.on('registration_error', data => {
-                console.error('❌ Ошибка регистрации:', data);
-                showToast(data.error || 'Ошибка регистрации', 'error');
-                
-                // Разблокируем кнопку
-                const connectButton = document.getElementById('connectButton');
-                const connectButtonText = document.getElementById('connectButtonText');
-                connectButton.disabled = false;
-                connectButtonText.textContent = 'Подключиться к серверу';
-            });
-
-            // Обновление списка операторов
-            socket.on('operators_update', updateOperators);
-
-            // Продвижение в очереди
-            socket.on('queue_advanced', data => {
-                console.log('🔔 Уведомление о очереди:', data);
-                
-                if (data.username === currentUser) {
-                    playNotification();
-                    showTitleAlert(data.operator_name);
-                    showToast(`🎉 Оператор "${data.operator_name}" свободен! Займите его.`, 'warning');
-                }
-            });
-
-            // Ошибка подключения
-            socket.on('connect_error', err => {
-                console.error('❌ Ошибка подключения:', err);
-                updateConnectionStatus(false, 'Ошибка подключения');
-                
-                // Разблокируем кнопку
-                const connectButton = document.getElementById('connectButton');
-                const connectButtonText = document.getElementById('connectButtonText');
-                connectButton.disabled = false;
-                connectButtonText.textContent = 'Повторить подключение';
-                
-                showToast('Не удалось подключиться к серверу', 'error');
-            });
-
-            // Отключение от сервера
-            socket.on('disconnect', (reason) => {
-                console.log('🔌 Отключились от сервера:', reason);
-                updateConnectionStatus(false, 'Отключено');
-                
-                if (reason === 'io server disconnect') {
-                    showToast('Сервер отключил соединение', 'error');
-                }
-            });
-
-            // Успешное переподключение
-            socket.on('reconnect', () => {
-                console.log('🔄 Переподключились к серверу');
-                updateConnectionStatus(true, 'Подключено');
-                
-                if (currentUser) {
-                    showToast('✅ Соединение восстановлено', 'success');
-                    
-                    // Повторно регистрируемся
-                    setTimeout(() => {
-                        if (socket && socket.connected) {
-                            socket.emit('set_username', currentUser);
-                        }
-                    }, 300);
-                }
-            });
-        }
-
-        function showMainInterface() {
-            document.getElementById('loginForm').classList.add('hidden');
-            document.getElementById('userHeader').classList.remove('hidden');
-            document.getElementById('operatorsContainer').classList.remove('hidden');
-            document.getElementById('logoutButton').classList.remove('hidden');
-            document.getElementById('serverInfo').classList.remove('hidden');
-            
-            document.getElementById('currentUser').textContent = currentUser;
-            document.getElementById('serverAddress').textContent = RENDER_SERVER;
-            
-            // Обновляем статус в заголовке
-            updateConnectionStatus(true, 'Подключено');
-        }
-
-        function showOSDialog(operatorId, isQueue = false) {
-            console.log('📱 Показываем диалог ОС для оператора:', operatorId, isQueue ? '(очередь)' : '(занять)');
-            selectedOperatorId = operatorId;
-            document.getElementById('osDialog').dataset.queue = isQueue;
-            
-            // Показываем оверлей с диалогом внутри
-            document.getElementById('osOverlay').classList.remove('hidden');
-        }
-
-        function hideOSDialog() {
-            console.log('❌ Закрываем диалог ОС');
-            document.getElementById('osOverlay').classList.add('hidden');
-        }
-
-        function selectOS(osType) {
-            console.log('✅ Выбрана ОС:', osType);
-            const isQueue = document.getElementById('osDialog').dataset.queue === 'true';
-            
-            hideOSDialog();
-
-            const eventData = {
-                operator_id: selectedOperatorId,
-                username: currentUser,
-                os_type: osType
-            };
-
-            if (isQueue) {
-                console.log('📝 Встаем в очередь с данными:', eventData);
-                socket.emit('join_queue', eventData);
-                showToast('✅ Вы встали в очередь', 'success');
-            } else {
-                console.log('🎯 Занимаем оператора с данными:', eventData);
-                socket.emit('occupy_operator', eventData);
-                showToast('✅ Оператор занят', 'success');
             }
-        }
+        });
+    }
 
-        function releaseOperator(operatorId) {
-            console.log('🗑️ Освобождаем оператора:', operatorId);
-            socket.emit('release_operator', {
-                operator_id: operatorId,
-                username: currentUser
-            });
-            showToast('✅ Оператор освобожден', 'success');
+    function startHeartbeat() {
+        // Останавливаем старый интервал если есть
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
         }
+        
+        // Отправляем heartbeat каждые 30 секунд
+        heartbeatInterval = setInterval(() => {
+            if (socket && socket.connected && currentUser) {
+                socket.emit('heartbeat', {username: currentUser});
+            }
+        }, 30000); // 30 секунд
+    }
 
-        function updateOperators(operators) {
-            const container = document.getElementById('operatorsContainer');
-            if (!container) return;
+    function showMainInterface() {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('userHeader').classList.remove('hidden');
+        document.getElementById('operatorsContainer').classList.remove('hidden');
+        document.getElementById('logoutButton').classList.remove('hidden');
+        document.getElementById('serverInfo').classList.remove('hidden');
+        
+        document.getElementById('currentUser').textContent = currentUser;
+        document.getElementById('serverAddress').textContent = RENDER_SERVER;
+        
+        // Обновляем статус в заголовке
+        updateConnectionStatus(true, 'Подключено');
+    }
+
+    function showOSDialog(operatorId, isQueue = false) {
+        console.log('📱 Показываем диалог ОС для оператора:', operatorId, isQueue ? '(очередь)' : '(занять)');
+        selectedOperatorId = operatorId;
+        document.getElementById('osDialog').dataset.queue = isQueue;
+        
+        // Показываем оверлей с диалогом внутри
+        document.getElementById('osOverlay').classList.remove('hidden');
+    }
+
+    function hideOSDialog() {
+        console.log('❌ Закрываем диалог ОС');
+        document.getElementById('osOverlay').classList.add('hidden');
+    }
+
+    function selectOS(osType) {
+        console.log('✅ Выбрана ОС:', osType);
+        const isQueue = document.getElementById('osDialog').dataset.queue === 'true';
+        
+        hideOSDialog();
+
+        const eventData = {
+            operator_id: selectedOperatorId,
+            username: currentUser,
+            os_type: osType
+        };
+
+        if (isQueue) {
+            console.log('📝 Встаем в очередь с данными:', eventData);
+            socket.emit('join_queue', eventData);
+            showToast('✅ Вы встали в очередь', 'success');
+        } else {
+            console.log('🎯 Занимаем оператора с данными:', eventData);
+            socket.emit('occupy_operator', eventData);
+            showToast('✅ Оператор занят', 'success');
+        }
+    }
+
+    function releaseOperator(operatorId) {
+        console.log('🗑️ Освобождаем оператора:', operatorId);
+        socket.emit('release_operator', {
+            operator_id: operatorId,
+            username: currentUser
+        });
+        showToast('✅ Оператор освобожден', 'success');
+    }
+
+    function updateOperators(operators) {
+        const container = document.getElementById('operatorsContainer');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        let freeCount = 0;
+        let occupiedCount = 0;
+        let queueCount = 0;
+        
+        operators.forEach(op => {
+            const isUserOperator = op.occupied_by === currentUser;
+            const isInQueue = op.queue.some(u => u.username === currentUser);
+            const queuePosition = isInQueue ? 
+                op.queue.findIndex(u => u.username === currentUser) + 1 : null;
             
-            container.innerHTML = '';
+            // Подсчет статистики
+            if (op.occupied_by) {
+                occupiedCount++;
+            } else {
+                freeCount++;
+            }
+            queueCount += op.queue.length;
             
-            let freeCount = 0;
-            let occupiedCount = 0;
-            let queueCount = 0;
+            // Создание карточки оператора
+            const card = document.createElement('div');
+            card.className = `operator-card ${isUserOperator ? 'user-operator' : ''}`;
             
-            operators.forEach(op => {
-                const isUserOperator = op.occupied_by === currentUser;
-                const isInQueue = op.queue.some(u => u.username === currentUser);
-                const queuePosition = isInQueue ? 
-                    op.queue.findIndex(u => u.username === currentUser) + 1 : null;
+            // Статус оператора
+            const statusHTML = op.occupied_by 
+                ? `<div>🔴 Занят: ${op.occupied_by}</div><div>💻 ОС: ${op.os_type || 'Не указана'}</div>`
+                : '<div>🟢 Свободен</div>';
+            
+            card.innerHTML = `
+                <h3>👨‍💼 ${op.name}</h3>
+                <div class="operator-status ${op.occupied_by ? 'busy' : 'free'}">
+                    ${statusHTML}
+                </div>
+            `;
+
+            // Очередь
+            if (op.queue.length > 0) {
+                const queueList = document.createElement('div');
+                queueList.className = 'queue-list show';
                 
-                // Подсчет статистики
-                if (op.occupied_by) {
-                    occupiedCount++;
-                } else {
-                    freeCount++;
-                }
-                queueCount += op.queue.length;
-                
-                // Создание карточки оператора
-                const card = document.createElement('div');
-                card.className = `operator-card ${isUserOperator ? 'user-operator' : ''}`;
-                
-                // Статус оператора
-                const statusHTML = op.occupied_by 
-                    ? `<div>🔴 Занят: ${op.occupied_by}</div><div>💻 ОС: ${op.os_type || 'Не указана'}</div>`
-                    : '<div>🟢 Свободен</div>';
-                
-                card.innerHTML = `
-                    <h3>👨‍💼 ${op.name}</h3>
-                    <div class="operator-status ${op.occupied_by ? 'busy' : 'free'}">
-                        ${statusHTML}
+                queueList.innerHTML = `
+                    <div class="queue-header">
+                        <strong>👥 Очередь (${op.queue.length})</strong>
+                        <button class="toggle-queue" onclick="this.parentElement.parentElement.classList.toggle('show')">
+                            ▲
+                        </button>
                     </div>
                 `;
-
-                // Очередь
-                if (op.queue.length > 0) {
-                    const queueList = document.createElement('div');
-                    queueList.className = 'queue-list show';
-                    
-                    queueList.innerHTML = `
-                        <div class="queue-header">
-                            <strong>👥 Очередь (${op.queue.length})</strong>
-                            <button class="toggle-queue" onclick="this.parentElement.parentElement.classList.toggle('show')">
-                                ▲
-                            </button>
+                
+                op.queue.forEach((user, index) => {
+                    const queueClass = user.username === currentUser ? 'user-queue-item' : '';
+                    queueList.innerHTML += `
+                        <div class="queue-item ${queueClass}">
+                            <span class="queue-number">${index + 1}.</span>
+                            <span class="queue-user">${user.username}</span>
+                            <span class="queue-os">${user.os_type || '?'}</span>
                         </div>
                     `;
-                    
-                    op.queue.forEach((user, index) => {
-                        const queueClass = user.username === currentUser ? 'user-queue-item' : '';
-                        queueList.innerHTML += `
-                            <div class="queue-item ${queueClass}">
-                                <span class="queue-number">${index + 1}.</span>
-                                <span class="queue-user">${user.username}</span>
-                                <span class="queue-os">${user.os_type || '?'}</span>
-                            </div>
-                        `;
-                    });
-                    card.appendChild(queueList);
-                }
+                });
+                card.appendChild(queueList);
+            }
 
-                // Кнопки действий
-                const btnContainer = document.createElement('div');
-                btnContainer.className = 'buttons-container';
-                
-                if (op.occupied_by) {
-                    if (op.occupied_by === currentUser) {
-                        // Пользователь занял этого оператора
-                        btnContainer.innerHTML = `
-                            <button class="action-btn busy" onclick="releaseOperator('${op.id}')">
-                                🗑️ Освободить оператора
-                            </button>
-                        `;
-                    } else if (isInQueue) {
-                        // Пользователь в очереди к этому оператору
-                        btnContainer.innerHTML = `
-                            <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.2), transparent); border-radius: 10px; margin-bottom: 15px; border: 2px solid var(--queue-color);">
-                                <div style="font-size: 18px; color: var(--queue-color); margin-bottom: 5px;">🎯 Вы в очереди</div>
-                                <div style="font-size: 24px; font-weight: bold; color: var(--queue-color);">Позиция: ${queuePosition}</div>
-                            </div>
-                        `;
-                    } else {
-                        // Оператор занят другим пользователем
-                        btnContainer.innerHTML = `
-                            <button class="action-btn queue" onclick="showOSDialog('${op.id}', true)">
-                                📝 Встать в очередь
-                            </button>
-                        `;
-                    }
-                } else {
-                    // Оператор свободен
+            // Кнопки действий
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'buttons-container';
+            
+            if (op.occupied_by) {
+                if (op.occupied_by === currentUser) {
+                    // Пользователь занял этого оператора
                     btnContainer.innerHTML = `
-                        <button class="action-btn free" onclick="showOSDialog('${op.id}')">
-                            ✅ Занять оператора
+                        <button class="action-btn busy" onclick="releaseOperator('${op.id}')">
+                            🗑️ Освободить оператора
+                        </button>
+                    `;
+                } else if (isInQueue) {
+                    // Пользователь в очереди к этому оператору
+                    btnContainer.innerHTML = `
+                        <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.2), transparent); border-radius: 10px; margin-bottom: 15px; border: 2px solid var(--queue-color);">
+                            <div style="font-size: 18px; color: var(--queue-color); margin-bottom: 5px;">🎯 Вы в очереди</div>
+                            <div style="font-size: 24px; font-weight: bold; color: var(--queue-color);">Позиция: ${queuePosition}</div>
+                        </div>
+                    `;
+                } else {
+                    // Оператор занят другим пользователем
+                    btnContainer.innerHTML = `
+                        <button class="action-btn queue" onclick="showOSDialog('${op.id}', true)">
+                            📝 Встать в очередь
                         </button>
                     `;
                 }
-
-                card.appendChild(btnContainer);
-                container.appendChild(card);
-            });
-            
-            // Обновляем статистику
-            document.getElementById('freeCount').textContent = freeCount;
-            document.getElementById('occupiedCount').textContent = occupiedCount;
-            document.getElementById('queueCount').textContent = queueCount;
-        }
-
-        function playNotification() {
-            const notificationSound = document.getElementById('notificationSound');
-            
-            try {
-                notificationSound.currentTime = 0;
-                notificationSound.volume = 0.6;
-                const playPromise = notificationSound.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.log('🔇 Автовоспроизведение звука заблокировано');
-                    });
-                }
-            } catch (error) {
-                console.log('❌ Ошибка воспроизведения звука:', error);
+            } else {
+                // Оператор свободен
+                btnContainer.innerHTML = `
+                    <button class="action-btn free" onclick="showOSDialog('${op.id}')">
+                        ✅ Занять оператора
+                    </button>
+                `;
             }
-        }
 
-        function showTitleAlert(operatorName) {
-            if (blinkInterval) {
-                clearInterval(blinkInterval);
+            card.appendChild(btnContainer);
+            container.appendChild(card);
+        });
+        
+        // Обновляем статистику
+        document.getElementById('freeCount').textContent = freeCount;
+        document.getElementById('occupiedCount').textContent = occupiedCount;
+        document.getElementById('queueCount').textContent = queueCount;
+    }
+
+    function playNotification() {
+        const notificationSound = document.getElementById('notificationSound');
+        
+        try {
+            notificationSound.currentTime = 0;
+            notificationSound.volume = 0.6;
+            const playPromise = notificationSound.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('🔇 Автовоспроизведение звука заблокировано');
+                });
             }
-            
-            let blinkCount = 0;
-            const favicon = document.querySelector('link[rel="icon"]');
-            const alertFavicon = '/static/alert.ico?' + Date.now();
-            const originalFavicon = favicon.href;
-            
-            blinkInterval = setInterval(() => {
-                if (blinkCount % 2 === 0) {
-                    document.title = `🚨 ${operatorName} СВОБОДЕН! 🚨`;
-                    favicon.href = alertFavicon;
-                } else {
-                    document.title = originalTitle;
-                    favicon.href = originalFavicon;
-                }
-                
-                blinkCount++;
-                
-                if (blinkCount >= 40 || isTabActive) {
-                    stopTitleBlinking();
-                }
-            }, 500);
+        } catch (error) {
+            console.log('❌ Ошибка воспроизведения звука:', error);
         }
+    }
 
-        function stopTitleBlinking() {
-            if (blinkInterval) {
-                clearInterval(blinkInterval);
-                blinkInterval = null;
+    function showTitleAlert(operatorName) {
+        if (blinkInterval) {
+            clearInterval(blinkInterval);
+        }
+        
+        let blinkCount = 0;
+        const favicon = document.querySelector('link[rel="icon"]');
+        const alertFavicon = '/static/alert.ico?' + Date.now();
+        const originalFavicon = favicon.href;
+        
+        blinkInterval = setInterval(() => {
+            if (blinkCount % 2 === 0) {
+                document.title = `🚨 ${operatorName} СВОБОДЕН! 🚨`;
+                favicon.href = alertFavicon;
+            } else {
                 document.title = originalTitle;
-                document.querySelector('link[rel="icon"]').href = originalFavicon;
+                favicon.href = originalFavicon;
             }
-        }
+            
+            blinkCount++;
+            
+            if (blinkCount >= 40 || isTabActive) {
+                stopTitleBlinking();
+            }
+        }, 500);
+    }
 
-        function showToast(message, type = 'info') {
-            // Удалить старое уведомление
-            const oldToast = document.querySelector('.toast-notification');
-            if (oldToast) {
-                oldToast.remove();
-            }
-            
-            // Определяем иконку
-            let icon = 'ℹ️';
-            switch(type) {
-                case 'success': icon = '✅'; break;
-                case 'error': icon = '❌'; break;
-                case 'warning': icon = '⚠️'; break;
-                case 'info': icon = 'ℹ️'; break;
-            }
-            
-            // Создаем новое уведомление
-            const toast = document.createElement('div');
-            toast.className = `toast-notification ${type}`;
-            toast.innerHTML = `
-                <span class="toast-icon">${icon}</span>
-                <span style="flex-grow: 1;">${message}</span>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Автоматически скрыть через 5 секунд
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.classList.add('fade-out');
-                    setTimeout(() => {
-                        if (toast.parentNode) {
-                            toast.remove();
-                        }
-                    }, 500);
-                }
-            }, 5000);
-            
-            // Закрытие по клику
-            toast.addEventListener('click', () => {
+    function stopTitleBlinking() {
+        if (blinkInterval) {
+            clearInterval(blinkInterval);
+            blinkInterval = null;
+            document.title = originalTitle;
+            document.querySelector('link[rel="icon"]').href = originalFavicon;
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        // Удалить старое уведомление
+        const oldToast = document.querySelector('.toast-notification');
+        if (oldToast) {
+            oldToast.remove();
+        }
+        
+        // Определяем иконку
+        let icon = 'ℹ️';
+        switch(type) {
+            case 'success': icon = '✅'; break;
+            case 'error': icon = '❌'; break;
+            case 'warning': icon = '⚠️'; break;
+            case 'info': icon = 'ℹ️'; break;
+        }
+        
+        // Создаем новое уведомление
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        toast.innerHTML = `
+            <span class="toast-icon">${icon}</span>
+            <span style="flex-grow: 1;">${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Автоматически скрыть через 5 секунд
+        setTimeout(() => {
+            if (toast.parentNode) {
                 toast.classList.add('fade-out');
                 setTimeout(() => {
                     if (toast.parentNode) {
                         toast.remove();
                     }
-                }, 300);
-            });
-        }
-
-        function updateConnectionStatus(connected, message = '') {
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            
-            statusDot.className = 'status-dot ' + 
-                (connected ? 'status-connected' : 
-                 message.includes('Подключение') || message.includes('Переподключение') ? 
-                 'status-connecting' : 'status-disconnected');
-            
-            statusText.textContent = message || (connected ? 'Подключено' : 'Отключено');
-        }
-
-        // Функция для выхода из системы
-        function logout() {
-            if (socket) {
-                socket.disconnect();
+                }, 500);
             }
-            currentUser = null;
-            
-            document.getElementById('loginForm').classList.remove('hidden');
-            document.getElementById('userHeader').classList.add('hidden');
-            document.getElementById('operatorsContainer').classList.add('hidden');
-            document.getElementById('logoutButton').classList.add('hidden');
-            document.getElementById('serverInfo').classList.add('hidden');
-            
-            document.getElementById('usernameInput').focus();
-            
-            showToast('Вы вышли из системы', 'info');
+        }, 5000);
+        
+        // Закрытие по клику
+        toast.addEventListener('click', () => {
+            toast.classList.add('fade-out');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        });
+    }
+
+    function updateConnectionStatus(connected, message = '') {
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        
+        statusDot.className = 'status-dot ' + 
+            (connected ? 'status-connected' : 
+             message.includes('Подключение') || message.includes('Переподключение') ? 
+             'status-connecting' : 'status-disconnected');
+        
+        statusText.textContent = message || (connected ? 'Подключено' : 'Отключено');
+    }
+
+    // Функция для выхода из системы
+    function logout() {
+        if (socket) {
+            socket.disconnect();
         }
+        
+        // Останавливаем heartbeat
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+        }
+        
+        currentUser = null;
+        
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('userHeader').classList.add('hidden');
+        document.getElementById('operatorsContainer').classList.add('hidden');
+        document.getElementById('logoutButton').classList.add('hidden');
+        document.getElementById('serverInfo').classList.add('hidden');
+        
+        document.getElementById('usernameInput').focus();
+        
+        showToast('Вы вышли из системы', 'info');
+    }
 
-        // Экспорт функций для вызова из onclick
-        window.showOSDialog = showOSDialog;
-        window.releaseOperator = releaseOperator;
-        window.logout = logout;
+    // Экспорт функций для вызова из onclick
+    window.showOSDialog = showOSDialog;
+    window.releaseOperator = releaseOperator;
+    window.logout = logout;
 
-        console.log('✅ Скрипт загружен и готов к работе');
-    </script>
+    console.log('✅ Скрипт загружен и готов к работе');
+</script>
 </body>
 </html>
+
