@@ -270,15 +270,20 @@ def process_queue(operator_id):
             queue=operator['queue']
         )
         
-        # Отправляем обновление всем клиентам
-        socketio.emit('operators_update', get_operators_from_db(), broadcast=True)
+        # Получаем обновленный список операторов
+        updated_operators = get_operators_from_db()
         
-        # Отправляем уведомление пользователю
+        # Отправляем обновление всем клиентам
+        socketio.emit('operators_update', updated_operators, broadcast=True)
+        
+        # Отправляем уведомление пользователю, который вышел из очереди
         socketio.emit('queue_advanced', {
             'operator_name': operator['name'],
-            'username': next_user['username']
+            'username': next_user['username'],
+            'message': f'Оператор "{operator["name"]}" свободен!'
         })
         
+        print(f"[{datetime.now()}] 🔔 Отправлено уведомление для {next_user['username']} о продвижении в очереди")
         return True
     
     return False
@@ -333,6 +338,24 @@ def handle_set_username(data):
 def handle_occupy(data):
     print(f"[{datetime.now()}] 🎯 Занятие оператора: {data}")
     
+    # Проверяем, свободен ли оператор
+    operators = get_operators_from_db()
+    operator = next((op for op in operators if op['id'] == data['operator_id']), None)
+    
+    if not operator:
+        emit('operation_error', {'error': 'Оператор не найден'}, room=request.sid)
+        return
+    
+    if operator['occupied_by']:
+        emit('operation_error', {'error': 'Оператор уже занят'}, room=request.sid)
+        return
+    
+    # Проверяем, не стоит ли пользователь уже в очереди к этому оператору
+    if any(user['username'] == data['username'] for user in operator['queue']):
+        # Удаляем пользователя из очереди
+        new_queue = [user for user in operator['queue'] if user['username'] != data['username']]
+        update_operator_in_db(data['operator_id'], queue=new_queue)
+    
     # Обновляем оператора в БД
     update_operator_in_db(
         data['operator_id'],
@@ -353,7 +376,17 @@ def handle_join_queue(data):
     operators = get_operators_from_db()
     operator = next((op for op in operators if op['id'] == data['operator_id']), None)
     
-    if operator and data['username'] not in [u['username'] for u in operator['queue']]:
+    if not operator:
+        emit('operation_error', {'error': 'Оператор не найден'}, room=request.sid)
+        return
+    
+    # Проверяем, не занят ли уже оператор этим пользователем
+    if operator['occupied_by'] == data['username']:
+        emit('operation_error', {'error': 'Вы уже заняли этого оператора'}, room=request.sid)
+        return
+    
+    # Проверяем, не стоит ли уже пользователь в очереди
+    if data['username'] not in [u['username'] for u in operator['queue']]:
         # Добавляем пользователя в очередь
         new_queue = operator['queue'].copy()
         new_queue.append({
@@ -373,6 +406,18 @@ def handle_join_queue(data):
 @socketio.on('release_operator')
 def handle_release(data):
     print(f"[{datetime.now()}] 🗑️ Освобождение оператора: {data}")
+    
+    # Проверяем, что оператор действительно занят этим пользователем
+    operators = get_operators_from_db()
+    operator = next((op for op in operators if op['id'] == data['operator_id']), None)
+    
+    if not operator:
+        emit('operation_error', {'error': 'Оператор не найден'}, room=request.sid)
+        return
+    
+    if operator['occupied_by'] != data['username']:
+        emit('operation_error', {'error': 'Этот оператор занят другим пользователем'}, room=request.sid)
+        return
     
     # Освобождаем оператора в БД
     update_operator_in_db(
@@ -412,6 +457,11 @@ def handle_server_ping():
         'timestamp': datetime.now().isoformat(),
         'message': 'Server is alive and responding'
     }, room=request.sid)
+
+@socketio.on('operation_error')
+def handle_operation_error(data):
+    """Обработчик ошибок операций"""
+    print(f"[{datetime.now()}] ❌ Ошибка операции: {data}")
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
