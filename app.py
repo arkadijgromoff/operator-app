@@ -116,10 +116,17 @@ def update_operator_in_db(operator_id, occupied_by=None, os_type=None, queue=Non
                 (json.dumps(queue), operator_id)
             )
         
+        # Обновляем занятость оператора
         if occupied_by is not None:
             cursor.execute(
                 "UPDATE operators SET occupied_by = ?, os_type = ? WHERE id = ?",
                 (occupied_by, os_type, operator_id)
+            )
+        elif occupied_by is None and os_type is None:
+            # Явное освобождение оператора
+            cursor.execute(
+                "UPDATE operators SET occupied_by = NULL, os_type = NULL WHERE id = ?",
+                (operator_id,)
             )
         
         conn.commit()
@@ -264,13 +271,17 @@ def process_queue(operator_id):
         )
         
         # Отправляем обновление всем клиентам
-        emit('operators_update', get_operators_from_db(), broadcast=True)
+        socketio.emit('operators_update', get_operators_from_db(), broadcast=True)
         
         # Отправляем уведомление пользователю
         socketio.emit('queue_advanced', {
             'operator_name': operator['name'],
             'username': next_user['username']
         })
+        
+        return True
+    
+    return False
 
 @socketio.on('connect')
 def handle_connect():
@@ -364,13 +375,21 @@ def handle_release(data):
     print(f"[{datetime.now()}] 🗑️ Освобождение оператора: {data}")
     
     # Освобождаем оператора в БД
-    update_operator_in_db(data['operator_id'], occupied_by=None, os_type=None)
-    
-    # Обрабатываем очередь
-    process_queue(data['operator_id'])
+    update_operator_in_db(
+        data['operator_id'],
+        occupied_by=None,
+        os_type=None
+    )
     
     # Обновляем пользователя
     update_user_last_seen(data['username'])
+    
+    # Обрабатываем очередь
+    queue_processed = process_queue(data['operator_id'])
+    
+    # Если очередь не обработалась (не было очереди), отправляем обновление
+    if not queue_processed:
+        emit('operators_update', get_operators_from_db(), broadcast=True)
 
 @socketio.on('heartbeat')
 def handle_heartbeat(data):
